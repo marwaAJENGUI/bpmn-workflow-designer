@@ -19,6 +19,9 @@
     "@angular/platform-browser": "~9.1.12",
     "@angular/platform-browser-dynamic": "~9.1.12",
     "@angular/router": "~9.1.12",
+    "bpmn-js": "^8.2.1",
+    "diagram-js-minimap": "^2.0.4",
+    "ngx-bpmn-modeler": "^1.0.1",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
