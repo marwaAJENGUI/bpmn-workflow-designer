@@ -1,13 +1,13 @@
 <!-- <app-diagram style="height: 100%;width: 100%;"></app-diagram> -->
-<div class="diagram-parent" style="height: 90%;width: 100%;">
-    <app-diagram [url]="diagramUrl" (importDone)="handleImported($event)"  [content]="fileData" ></app-diagram>
-  
-    <div class="import-error" *ngIf="importError">
-      <strong>Failed to render diagram: </strong>
-      {{ importError.message }}
-    </div>
+<div class="diagram-parent" style="height: 80%;width: 100%;">
+    <app-diagram [url]="diagramUrl" (importDone)="handleImported($event)"  ></app-diagram>
+
+</div>
+<div class="import-error" *ngIf="importError">
+    <strong>Failed to render diagram: </strong>
+    {{ importError.message }}
   </div>
-  <div class="io-import-export">
+<div class="io-import-export">
 
     <ul class="io-import io-control io-control-list io-horizontal">
         <li>
@@ -28,3 +28,4 @@
         </li>
         <file-save-as [fileContent]="fileData"></file-save-as>
     </ul>
+</div>

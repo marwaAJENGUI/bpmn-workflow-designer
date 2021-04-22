@@ -9,7 +9,8 @@ import {
   Output,
   ViewChild,
   SimpleChanges,
-  EventEmitter
+  EventEmitter,
+  AfterViewInit
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, switchMap } from 'rxjs/operators';
@@ -17,62 +18,99 @@ import { map, switchMap } from 'rxjs/operators';
 //import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
 
 import BpmnJS from 'bpmn-js/lib/Modeler.js';
-import * as minimapModule  from 'diagram-js-minimap';
+import  userTaskExtension from './../../resources/user-task-properties.json';
+import minimapModule  from 'diagram-js-minimap';
 
 import { from, Observable, Subscription } from 'rxjs';
-import { DataService } from '../data.service';
+import { DataService } from '../services/data.service';
+import { BpmnJsService } from '../services/bpmn-js.service';
+import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
 
 @Component({
   selector: 'app-diagram',
   templateUrl: './diagram.component.html',
-  styleUrls: ['./diagram.component.css']
+  styleUrls: [
+    './diagram.component.css',
+    '../user-task-properties/user-task-properties.component.css'
+  ]
 })
-export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy, OnInit {
+export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
   private bpmnJS: BpmnJS;
 
   @ViewChild('ref', { static: true }) private el: ElementRef;
   @Output() private importDone: EventEmitter<any> = new EventEmitter();
   @Input() private url: string;
-  @Input() content: any;
   fileData:any;
   subscription: Subscription;
-  
-  constructor(private http: HttpClient, private data: DataService) {
+  bpmnData:any;
+  bpmnSubscription: Subscription;
+  rightClickEvent:any;
+  rightClickSubscription: Subscription;
 
+  constructor(private http: HttpClient, private data: DataService, private bpmn:BpmnJsService, private rightClick:ModelerRightClikEventService) { }
+  
+  ngOnInit(): void { 
+    this.subscription = this.data.currentMessage.subscribe(message => {
+      if (message!='default message') {
+        this.fileData = message;
+        this.importDiagram(this.fileData);
+        this.sendBpmn();
+      }
+    });
+    this.rightClickSubscription = this.rightClick.currentMessage.subscribe(message => {
+      if (message!='default message') {
+        this.rightClickEvent = message;
+      }
+    });
+    this.bpmnSubscription = this.bpmn.currentMessage.subscribe(message => {
+      if (message!='default message') {
+        this.bpmnJS=message;
+       // ?????????????????????????
+      }
+    });
+  }
+  ngAfterViewInit():void{
     this.bpmnJS = new BpmnJS({
+      container: "#diagram-component",
       additionalModules: [
         minimapModule
-      ]
+      ],
+      userTE: userTaskExtension,
     });
+    console.info(this.bpmnJS);
     this.bpmnJS.on('import.done', ({ error }) => {
       if (!error) {
         this.bpmnJS.get('canvas').zoom('fit-viewport');
       }
+    }); 
+    this.bpmnJS.createDiagram();
+    if (this.url!=null) {
+      this.loadUrl(this.url);
+      console.log("this.url "+this.url);
+    }
+    this.sendBpmn();
+    
+    // broadcast right click event
+    this.bpmnJS.on('element.contextmenu', 1500, (event) => {
+      this.onRightClick(event);
+      console.log("diagram send right click event");
+      event.originalEvent.preventDefault();
+      event.originalEvent.stopPropagation();  
     });
   }
   
-  ngOnInit(): void { 
-    this.bpmnJS.createDiagram();
-    this.subscription = this.data.currentMessage.subscribe(message => this.fileData = message);
-  }
-  ngAfterContentInit(): void {
-    this.bpmnJS.attachTo(this.el.nativeElement);
-  }
-
-
 
   ngOnChanges(changes: SimpleChanges) {
     // re-import whenever the url changes
     if (changes.url) {
       this.loadUrl(changes.url.currentValue);
       console.log("changes.url.currentValue"+changes.url.currentValue);
+      this.sendBpmn();
     }
-    /*************************
-     *  fasa5 content w ma teb3ou 
-     *************************************/
-    if (changes.content) {
+
+    /*if (changes.content) {
       console.log("changes.content.currentValue"+changes.content.currentValue);
-      this.importDiagram(this.content);
+      if (this.content!='default message') this.importDiagram(this.content);
      /*  this.bpmnJS.importXML(this.content,(err, warnings) => {
         if (err) {
           this.importDone.emit({
@@ -85,13 +123,14 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
             warnings: warnings
           });
         }
-      }); */
-    }
+      });
+    } */
   }
 
   ngOnDestroy(): void {
     this.bpmnJS.destroy();
     this.subscription.unsubscribe();
+    this.bpmnSubscription.unsubscribe();
   }
   
   saveFile(){
@@ -139,7 +178,11 @@ export class DiagramComponent implements AfterContentInit, OnChanges, OnDestroy,
   private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
     return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
   }
-
-  
-
+  sendBpmn() {
+    this.bpmn.changeMessage(this.bpmnJS);
+    console.log(this.bpmnJS);
+  }
+  onRightClick(event:any){
+    this.rightClick.changeMessage(event);
+  }
 }

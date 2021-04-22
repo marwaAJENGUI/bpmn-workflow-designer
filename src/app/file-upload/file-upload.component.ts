@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataService } from '../data.service';
+import { DataService } from '../services/data.service';
 
 @Component({
   selector: 'app-file-upload',
@@ -17,7 +17,11 @@ export class FileUploadComponent implements OnInit,OnDestroy {
   constructor(private data: DataService) { }
 
   ngOnInit(): void {
-    this.subscription = this.data.currentMessage.subscribe(message => this.fileData = message)
+    this.subscription = this.data.currentMessage.subscribe(message => {
+      if (message!='default message') {
+        this.fileData = message;
+      }
+    });
   }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

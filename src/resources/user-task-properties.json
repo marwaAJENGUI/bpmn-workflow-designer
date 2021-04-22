@@ -1,0 +1,26 @@
+{
+    "name": "QualityAssurance",
+    "uri": "http://some-company/schema/bpmn/qa",
+    "prefix": "activiti",
+    "xml": {
+      "tagAlias": "lowerCase"
+    },
+    "types": [
+      {
+        "name": "assignee",
+        "extends": [
+          "bpmn:UserTask"
+        ],
+        "properties": [
+          {
+            "name": "assignee",
+            "isAttr": true,
+            "type": "String"
+          }
+        ]
+      }
+    ],
+    "emumerations": [],
+    "associations": []
+  }
+  
