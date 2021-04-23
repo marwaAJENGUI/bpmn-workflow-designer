@@ -53,7 +53,7 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     });
     // open user task properties panel if user right clicks on element
     this.rightClickSubscription = this.rightClick.currentMessage.subscribe(message => {
-      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>this.rightClickEvent");
+      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>this.rightClickEvent",message);
       if (message!='default message') {
         this.rightClickEvent = message;
         console.info(this.rightClickEvent);
@@ -86,18 +86,24 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     this.moddle = this.bpmnJS.get('moddle');
     this.modeling = this.bpmnJS.get('modeling');
     console.info(this.moddle);
-    var ElementVariables = this.moddle.create('userTask');
+    var ElementVariables = this.moddle.create('bpmn:ExtensionElements');
     console.info(ElementVariables);
     this.moddle.create('bpmn:ExtensionElements');
     const extensionElements = this.businessObject.extensionElements || this.moddle.create('bpmn:ExtensionElements');
     console.info(extensionElements);
+    this.assignee=this.assigneeEl.value;
     this.modeling.updateProperties(this.element, {
       extensionElements,
       assignee: this.assignee
     });
+    console.info(this.element);
     this.businessObject.extensionElements.get('values').push(ElementVariables);  
     this.hidepanel();
-  }; 
+    this.bpmnJS.saveXML({ format: true }, (err, xml) =>{
+      // here xml is the bpmn format 
+      console.log("xml===", xml);
+    });
+  }
 
   showPanel() {
     this.renderer2.appendChild(this.elRef.nativeElement, this.panelEl.nativeElement);
