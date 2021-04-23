@@ -94,7 +94,7 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     this.assignee=this.assigneeEl.value;
     this.modeling.updateProperties(this.element, {
       extensionElements,
-      assignee: this.assignee
+      "activiti:assignee": this.assignee
     });
     console.info(this.element);
     this.businessObject.extensionElements.get('values').push(ElementVariables);  
