@@ -25,14 +25,14 @@ import { from, Observable, Subscription } from 'rxjs';
 import { DataService } from '../services/data.service';
 import { BpmnJsService } from '../services/bpmn-js.service';
 import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
+import  {default as customControlsModule}  from './custom';
 
 @Component({
   selector: 'app-diagram',
   templateUrl: './diagram.component.html',
   styleUrls: [
-    './diagram.component.css',
-    '../user-task-properties/user-task-properties.component.css'
-  ]
+    './diagram.component.css'
+    ]
 })
 export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
   private bpmnJS: BpmnJS;
@@ -46,6 +46,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   bpmnSubscription: Subscription;
   rightClickEvent:any;
   rightClickSubscription: Subscription;
+  static readonly HIGH_PRIORITY = 1500;
 
   constructor(private http: HttpClient, private data: DataService, private bpmn:BpmnJsService, private rightClick:ModelerRightClikEventService) { }
   
@@ -73,7 +74,8 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.bpmnJS = new BpmnJS({
       container: "#diagram-component",
       additionalModules: [
-        minimapModule
+        minimapModule,
+        customControlsModule
       ],
       userTE: userTaskExtension,
     });
@@ -91,7 +93,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.sendBpmn();
     
     // broadcast right click event
-    this.bpmnJS.on('element.contextmenu', 1500, (event) => {
+    this.bpmnJS.on('element.contextmenu', DiagramComponent.HIGH_PRIORITY, (event) => {
       this.onRightClick(event);
       console.log("diagram send right click event");
       event.originalEvent.preventDefault();

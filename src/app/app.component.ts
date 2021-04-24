@@ -12,7 +12,7 @@ import { DiagramComponent } from './diagram/diagram.component';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bpmn-io';
  // diagramUrl = 'https://cdn.staticaly.com/gh/bpmn-io/bpmn-js-examples/dfceecba/starter/diagram.bpmn';
- diagramUrl='https://cdn.statically.io/gh/bpmn-miwg/bpmn-miwg-test-suite/5463406cee7ad7f5abd63f89b8c93ef30920e619/MID%20bpanda%202019.05.0.8393/B.2.0-export.bpmn'; 
+ diagramUrl='https://cdn.statically.io/gh/bpmn-io/bpmn-js-integration/7d2585352af12ea80ad790bca5b5d4aa78a08065/test/spec/base/diagrams/test-labels-collaboration.bpmn'; 
  importError?: Error;
  @ViewChild(DiagramComponent) diagramComponent:DiagramComponent;
  fileData:any;

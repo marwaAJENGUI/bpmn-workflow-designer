@@ -4,7 +4,6 @@ import { BpmnJsService } from '../services/bpmn-js.service';
 import BpmnJS from 'bpmn-js/lib/Modeler.js';
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
 import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
-import  userTaskExtension from './../../resources/user-task-properties.json';
 
 @Component({
   selector: 'app-user-task-properties',
@@ -31,6 +30,8 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
   moddle: any;
   modeling: any;
   element:any;
+  static readonly USER_TASK = "bpmn:UserTask";
+
 /*
         lastCheckedEl = document.getElementById('last-checked'),
   */
@@ -48,20 +49,23 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
       if (message!='default message') {
         this.bpmnJS=message;
         console.log(">>>>>>>>>>>>>UserTaskPropertiesComponent>>>>>>>>>>>>>>>ngAfterViewInit()");
-        console.log(this.bpmnJS);
+        console.info(this.bpmnJS);
       }
     });
     // open user task properties panel if user right clicks on element
     this.rightClickSubscription = this.rightClick.currentMessage.subscribe(message => {
-      console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>this.rightClickEvent",message);
       if (message!='default message') {
         this.rightClickEvent = message;
-        console.info(this.rightClickEvent);
-        this.showPanel();
-        
         let element:any;
+        console.info(this.rightClickEvent);
         ({element } = this.rightClickEvent);
-        console.info(element);
+        if (element.type !=UserTaskPropertiesComponent.USER_TASK){
+          if(this.elRef.nativeElement.children.length>1){
+            this.hidepanel();
+          }
+          return;
+        }
+        this.showPanel();
         this.element=element;
         // ignore root element
         if (!element.parent) {
@@ -70,13 +74,7 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
 
         this.businessObject = getBusinessObject(element);
         console.info(this.businessObject);
-        console.info(this.businessObject['$attrs']['activiti:assignee']);
-    
-
-        this.assignee  = this.businessObject['$attrs']['activiti:assignee'];
-
-
-        this.assigneeEl.focus();
+        this.assignee  = this.businessObject['$attrs']['activiti:assignee']||this.businessObject['$attrs'].assignee||'';
       }
     });
  }
@@ -91,11 +89,20 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     this.moddle.create('bpmn:ExtensionElements');
     const extensionElements = this.businessObject.extensionElements || this.moddle.create('bpmn:ExtensionElements');
     console.info(extensionElements);
+    //this.validate();
     this.assignee=this.assigneeEl.value;
-    this.modeling.updateProperties(this.element, {
-      extensionElements,
-      "activiti:assignee": this.assignee
-    });
+    if (this.businessObject['$attrs'].assignee){
+      this.modeling.updateProperties(this.element, {
+        extensionElements,
+        "assignee": this.assignee
+      });
+    }else{
+        this.modeling.updateProperties(this.element, {
+          extensionElements,
+          "activiti:assignee": this.assignee
+      });
+
+    }
     console.info(this.element);
     this.businessObject.extensionElements.get('values').push(ElementVariables);  
     this.hidepanel();
@@ -105,22 +112,35 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     });
   }
 
-  showPanel() {
-    this.renderer2.appendChild(this.elRef.nativeElement, this.panelEl.nativeElement);
-    //this.renderer2.removeClass(this.panelEl.nativeElement,"hidden");
-    console.log(this.panelEl.nativeElement.nativeElement);
-
+  validate(){
+    if (!this.assigneeEl.value) return;
   }
-  
+
+  showPanel() {
+    let x= this.rightClickEvent.originalEvent.screenX,
+      y= this.rightClickEvent.originalEvent.screenY;
+    this.panelEl.nativeElement.setAttribute(
+      'style',
+      'position: absolute; left: '+x+'px; top: '+y+'px;'
+    );
+    console.log(this.panelEl.nativeElement);
+    this.renderer2.appendChild(this.elRef.nativeElement, this.panelEl.nativeElement);
+  }
+
+  //
+  @HostListener('document:keydown.escape', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+    this.hidepanel();
+  }
+
   hidepanel(){
     this.renderer2.removeChild(this.elRef.nativeElement, this.panelEl.nativeElement);
-    //this.renderer2.addClass(this.panelEl.nativeElement,"hidden");
-    console.log(this.panelEl.nativeElement.nativeElement);
-
   }
 
 }
 /*
+    //this.renderer2.addClass(this.panelEl.nativeElement,"hidden");
+    //this.renderer2.removeClass(this.panelEl.nativeElement,"hidden");
+    
     console.log(this.panelEl);
     //console.log(">>>>>>>>>>>>showPanel= "+this.showPanel);
     let hostElem = this.panelEl.nativeElement;
