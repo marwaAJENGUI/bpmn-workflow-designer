@@ -1,14 +1,14 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Renderer2, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { BpmnJsService } from '../../services/bpmn-js.service';
+import { BpmnJsService } from '../services/bpmn-js.service';
 import BpmnJS from 'bpmn-js/lib/Modeler.js';
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import { ModelerRightClikEventService } from '../../services/modeler-right-clik-event.service';
+import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
 
 @Component({
   selector: 'app-user-task-properties',
   templateUrl: './user-task-properties.component.html',
-  styleUrls: ['../properties-panel.css']
+  styleUrls: ['./user-task-properties.component.css']
 })
 export class UserTaskPropertiesComponent implements AfterViewInit {
 
