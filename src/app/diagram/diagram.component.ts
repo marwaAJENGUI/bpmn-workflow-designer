@@ -22,9 +22,9 @@ import  userTaskExtension from './../../resources/user-task-properties.json';
 import minimapModule  from 'diagram-js-minimap';
 
 import { from, Observable, Subscription } from 'rxjs';
-import { DataService } from '../services/data.service';
-import { BpmnJsService } from '../services/bpmn-js.service';
-import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
+import { DataService } from './services/data.service';
+import { BpmnJsService } from './services/bpmn-js.service';
+import { ModelerRightClikEventService } from './services/modeler-right-clik-event.service';
 import  {default as customControlsModule}  from './custom';
 
 @Component({

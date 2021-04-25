@@ -1,9 +1,9 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener, Renderer2, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { BpmnJsService } from '../services/bpmn-js.service';
+import { BpmnJsService } from '../../services/bpmn-js.service';
 import BpmnJS from 'bpmn-js/lib/Modeler.js';
 import { getBusinessObject } from 'bpmn-js/lib/util/ModelUtil';
-import { ModelerRightClikEventService } from '../services/modeler-right-clik-event.service';
+import { ModelerRightClikEventService } from '../../services/modeler-right-clik-event.service';
 
 @Component({
   selector: 'app-user-task-properties',
@@ -127,7 +127,9 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
     this.renderer2.appendChild(this.elRef.nativeElement, this.panelEl.nativeElement);
   }
 
-  //
+ 
+
+  // hide user properties panel if user click escape
   @HostListener('document:keydown.escape', ['$event']) onKeydownHandler(event: KeyboardEvent) {
     this.hidepanel();
   }
