@@ -5,12 +5,6 @@
   padding: 0;
 }
 
-html,
-body,
-#container {
-  height: 100%;
-}
-
 .panel {
   background-color: #fafafa;
   border: solid 1px #ccc;
@@ -28,27 +22,26 @@ body,
   left: 50%;
   position: absolute;
   top: 50%;
-  transform: translate(-50%, -50%);
 }
 
-#quality-assurance #form input {
+#properties-panel #form input {
   border: solid 1px #ccc;
   border-radius: 2px;
   font-family: "Arial", sans-serif;
   padding: 10px;
 }
 
-#quality-assurance #form input[type="text"] {
+#properties-panel #form input[type="text"] {
   width: 100%;
 }
 
-#quality-assurance #form #warning {
+#properties-panel #form #warning {
   background-color: rgba(255, 0, 0, 0.25);
   border-radius: 2px;
   padding: 10px;
 }
 
-#quality-assurance #form input[type="submit"] {
+#properties-panel #form input[type="submit"] {
   background-color: #fafafa;
   color: #111;
 }

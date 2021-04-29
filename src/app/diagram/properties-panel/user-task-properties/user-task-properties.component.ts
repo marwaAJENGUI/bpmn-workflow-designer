@@ -117,8 +117,8 @@ export class UserTaskPropertiesComponent implements AfterViewInit {
   }
 
   showPanel() {
-    let x= this.rightClickEvent.originalEvent.screenX,
-      y= this.rightClickEvent.originalEvent.screenY;
+    let x= this.rightClickEvent.originalEvent.clientX,
+      y= this.rightClickEvent.originalEvent.clientY;
     this.panelEl.nativeElement.setAttribute(
       'style',
       'position: absolute; left: '+x+'px; top: '+y+'px;'
