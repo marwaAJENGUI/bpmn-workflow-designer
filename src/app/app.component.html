@@ -26,6 +26,6 @@
             <button  (click)="saveXmlFile()" >save XML</button>
 
         </li>
-        <file-save-as [fileContent]="fileData"></file-save-as>
+        <file-save-as fileExtension=".bpmn20.xml" contentType="text/xml" [fileContent]="fileData"></file-save-as>
     </ul>
 </div>

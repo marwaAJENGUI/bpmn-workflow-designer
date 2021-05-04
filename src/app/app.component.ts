@@ -2,6 +2,8 @@ import { Component, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DataService } from './diagram/services/data.service';
 import { DiagramComponent } from './diagram/diagram.component';
+import { WorkflowService } from './diagram/services/workflow.service';
+import { Workflow } from './models/workflow';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +14,8 @@ import { DiagramComponent } from './diagram/diagram.component';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bpmn-io';
  // diagramUrl = 'https://cdn.staticaly.com/gh/bpmn-io/bpmn-js-examples/dfceecba/starter/diagram.bpmn';
- diagramUrl='https://cdn.statically.io/gh/bpmn-io/bpmn-js-integration/7d2585352af12ea80ad790bca5b5d4aa78a08065/test/spec/base/diagrams/test-labels-collaboration.bpmn'; 
+ // diagramUrl='https://cdn.statically.io/gh/bpmn-io/bpmn-js-integration/7d2585352af12ea80ad790bca5b5d4aa78a08065/test/spec/base/diagrams/test-labels-collaboration.bpmn'; 
+ diagramUrl: any = null;
  importError?: Error;
  @ViewChild(DiagramComponent) diagramComponent:DiagramComponent;
  fileData:any;

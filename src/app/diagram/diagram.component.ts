@@ -26,6 +26,8 @@ import { DataService } from './services/data.service';
 import { BpmnJsService } from './services/bpmn-js.service';
 import { ModelerRightClikEventService } from './services/modeler-right-clik-event.service';
 import  {default as customControlsModule}  from './custom';
+import { Workflow } from '../models/workflow';
+import { WorkflowService } from './services/workflow.service';
 
 @Component({
   selector: 'app-diagram',
@@ -39,7 +41,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
 
   @ViewChild('ref', { static: true }) private el: ElementRef;
   @Output() private importDone: EventEmitter<any> = new EventEmitter();
-  @Input() private url: string;
+  @Input() private url: string ;
   fileData:any;
   subscription: Subscription;
   bpmnData:any;
@@ -48,7 +50,12 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   rightClickSubscription: Subscription;
   static readonly HIGH_PRIORITY = 1500;
 
-  constructor(private http: HttpClient, private data: DataService, private bpmn:BpmnJsService, private rightClick:ModelerRightClikEventService) { }
+  constructor(private http: HttpClient,
+    private data: DataService,
+    private bpmn:BpmnJsService,
+    private rightClick:ModelerRightClikEventService,
+    private workflowRest: WorkflowService
+  ) { }
   
   ngOnInit(): void { 
     this.subscription = this.data.currentMessage.subscribe(message => {
@@ -66,10 +73,10 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.bpmnSubscription = this.bpmn.currentMessage.subscribe(message => {
       if (message!='default message') {
         this.bpmnJS=message;
-       // ?????????????????????????
       }
     });
   }
+
   ngAfterViewInit():void{
     this.bpmnJS = new BpmnJS({
       container: "#diagram-component",
@@ -100,33 +107,14 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
       event.originalEvent.stopPropagation();  
     });
   }
-  
 
   ngOnChanges(changes: SimpleChanges) {
     // re-import whenever the url changes
     if (changes.url) {
       this.loadUrl(changes.url.currentValue);
-      console.log("changes.url.currentValue"+changes.url.currentValue);
+      console.log("changes.url.currentValue= "+changes.url.currentValue);
       this.sendBpmn();
     }
-
-    /*if (changes.content) {
-      console.log("changes.content.currentValue"+changes.content.currentValue);
-      if (this.content!='default message') this.importDiagram(this.content);
-     /*  this.bpmnJS.importXML(this.content,(err, warnings) => {
-        if (err) {
-          this.importDone.emit({
-            type: 'error',
-            error: err
-          })
-        } else {
-          this.importDone.emit({
-            type: 'success',
-            warnings: warnings
-          });
-        }
-      });
-    } */
   }
 
   ngOnDestroy(): void {
@@ -136,19 +124,24 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   }
   
   saveFile(){
-    console.log("sendFile()");
+    console.log("saveFile()");
     this.bpmnJS.saveXML({ format: true }, (err, xml) =>{
       // here xml is the bpmn format 
       console.log("xml===", xml);
       this.data.changeMessage(xml);
+      let workflow= new Workflow();
+      workflow.setName('workflow_test');
+      workflow.setXml(xml);
+      console.info(this.workflowRest.save(workflow));
+      console.info(workflow);
     });
   }
-
 
   /**
    * Load diagram from URL and emit completion event
    */
   loadUrl(url: string): Subscription {
+    if ( url == null) return;
     return (
       this.http.get(url, { responseType: 'text' }).pipe(
         switchMap((xml: string) => this.importDiagram(xml)),
@@ -170,7 +163,6 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     );
   }
 
-
   /**
    * Creates a Promise to import the given XML into the current
    * BpmnJS instance, then returns it as an Observable.
@@ -188,3 +180,20 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.rightClick.changeMessage(event);
   }
 }
+    /*if (changes.content) {
+      console.log("changes.content.currentValue"+changes.content.currentValue);
+      if (this.content!='default message') this.importDiagram(this.content);
+     /*  this.bpmnJS.importXML(this.content,(err, warnings) => {
+        if (err) {
+          this.importDone.emit({
+            type: 'error',
+            error: err
+          })
+        } else {
+          this.importDone.emit({
+            type: 'success',
+            warnings: warnings
+          });
+        }
+      });
+    } */
