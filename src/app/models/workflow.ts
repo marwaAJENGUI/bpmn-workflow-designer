@@ -1,16 +1,38 @@
+import { Customers } from "./customers.enum";
+import { Modules } from "./modules.enum";
+
 export class Workflow {
     private id: number;
-    private custumer: string;
+    private customer: string;
     private module: string;
     private name: string;
     private version: number;
     private dateCreated: Date;
     private dateModified: Date;
-    private xml: string;
-    private draft: string;
+    private filePath: string;
+    private draft: boolean;
     private action: string;
     
+    randomValue = enumeration => {
+        console.log('enumeration: ' + enumeration);
+        const values = Object.keys(enumeration);
+        console.log('values: ' + values);
+        const enumKey = values[Math.floor(Math.random() * values.length)];
+        console.log('enumKey: ' +enumKey);
+        return enumeration[ enumKey];
+      };
 
+    public constructor(name:string,draft : boolean){
+        this.dateCreated= new Date();
+        this.version=this.dateCreated.getTime();
+        this.draft=draft;
+        this.name=name;
+        this.module=this.randomValue(Modules);
+        this.customer=this.randomValue(Customers);
+        this.filePath=this.setPath();
+        this.action="CREATE_WORKFLOAW";
+
+    }
     public getId(): number {
         return this.id;
     }
@@ -20,11 +42,11 @@ export class Workflow {
     }
 
     public getCustumer(): string {
-        return this.custumer;
+        return this.customer;
     }
 
     public setCustumer(custumer: string): void {
-        this.custumer = custumer;
+        this.customer = custumer;
     }
 
     public getModule(): string {
@@ -67,19 +89,21 @@ export class Workflow {
         this.dateModified = dateModified;
     }
 
-    public getXml(): string {
-        return this.xml;
+    public getFilePath(): string {
+        return this.filePath;
     }
 
-    public setXml(xml: string): void {
-        this.xml = xml;
+    public setFilePath(filePath: string): void {
+        this.filePath = filePath;
+        this.dateModified = new Date();
+        this.version= this.dateModified.getTime();
     }
 
-    public getDraft(): string {
+    public getDraft(): boolean {
         return this.draft;
     }
 
-    public setDraft(draft: string): void {
+    public setDraft(draft: boolean): void {
         this.draft = draft;
     }
 
@@ -91,8 +115,9 @@ export class Workflow {
         this.action = action;
     }
 
-    constructor(){
-        this.dateCreated= new Date();
-        this.version=0;
+    public setPath(){
+        let file = (this.draft)?"draft":"valid";
+        return this.customer+"/"+this.module+"/"+file+"/"+this.name+"_"+this.version;
     }
+
 }

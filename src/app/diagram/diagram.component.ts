@@ -28,7 +28,7 @@ import { ModelerRightClikEventService } from './services/modeler-right-clik-even
 import  {default as customControlsModule}  from './custom';
 import { Workflow } from '../models/workflow';
 import { WorkflowService } from './services/workflow.service';
-
+//import * as fs from "fs";
 @Component({
   selector: 'app-diagram',
   templateUrl: './diagram.component.html',
@@ -123,15 +123,20 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.bpmnSubscription.unsubscribe();
   }
   
-  saveFile(){
+  saveFile(draft:boolean){
     console.log("saveFile()");
     this.bpmnJS.saveXML({ format: true }, (err, xml) =>{
       // here xml is the bpmn format 
       console.log("xml===", xml);
       this.data.changeMessage(xml);
-      let workflow= new Workflow();
-      workflow.setName('workflow_test');
-      workflow.setXml(xml);
+      let workflow= new Workflow("workflow_test",draft);
+      let file = new File ([xml],"text.xml", {type: 'text/xml'});
+      /*
+      fs.appendFile('mynewfile1.txt', 'Hello content!', function (err) {
+        if (err) throw err;
+        console.log('Saved!');
+      });
+      */
       console.info(this.workflowRest.save(workflow));
       console.info(workflow);
     });

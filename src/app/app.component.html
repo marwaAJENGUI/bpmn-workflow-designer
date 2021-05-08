@@ -23,9 +23,11 @@
     </ul>
     <ul>    
         <li>
-            <button  (click)="saveXmlFile()" >save XML</button>
-
+            <button  (click)="saveXmlFile(false)" >save</button>
+            <button  (click)="saveXmlFile(true)" >save as draft</button>
         </li>
-        <file-save-as fileExtension=".bpmn20.xml" contentType="text/xml" [fileContent]="fileData"></file-save-as>
+        <li>
+            <file-save-as fileExtension=".bpmn20.xml" contentType="text/xml" [fileContent]="fileData"></file-save-as>
+        </li>
     </ul>
 </div>

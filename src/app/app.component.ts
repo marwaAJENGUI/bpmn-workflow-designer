@@ -29,9 +29,9 @@ ngOnDestroy() {
   this.subscription.unsubscribe();
 }
 
- saveXmlFile(){
+ saveXmlFile(draft:boolean){
    console.log("app->saveXmlFile()");
-   this.diagramComponent.saveFile();
+   this.diagramComponent.saveFile(draft);
  }
 
  handleImported(event) {
