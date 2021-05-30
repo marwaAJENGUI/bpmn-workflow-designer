@@ -17,8 +17,11 @@
     ],
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types"],  // "typeRoots": [] -> won't work
-    "types": ["node"]                      // "types": [] -> won't work
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/@types/node"
+      ],  // "typeRoots": [] 
+    "types": ["node"] // "types": [] 
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

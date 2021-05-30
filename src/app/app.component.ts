@@ -4,7 +4,8 @@ import { DataService } from './diagram/services/data.service';
 import { DiagramComponent } from './diagram/diagram.component';
 import { WorkflowService } from './diagram/services/workflow.service';
 import { Workflow } from './models/workflow';
-
+import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import {MatDialogRef,MatDialog} from '@angular/material/dialog';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -20,8 +21,13 @@ export class AppComponent implements OnInit, OnDestroy {
  @ViewChild(DiagramComponent) diagramComponent:DiagramComponent;
  fileData:any;
  subscription: Subscription;
+ dialogRef: MatDialogRef<ConfirmationDialogComponent>;
+ popoverTitle = 'Popover title';
+ popoverMessage = 'Popover description';
+ confirmClicked = false;
+ cancelClicked = false;
 
- constructor(private data: DataService) { }
+ constructor(private data: DataService, public dialog: MatDialog) { }
  ngOnInit() {
   this.subscription = this.data.currentMessage.subscribe(message => this.fileData = message);
 }
@@ -29,8 +35,12 @@ ngOnDestroy() {
   this.subscription.unsubscribe();
 }
 
- saveXmlFile(draft:boolean){
+ saveXmlFile(draft:boolean, event : any){
    console.log("app->saveXmlFile()");
+   if (!draft && !this.diagramComponent.isValid()) {
+     this.openConfirmationDialog(event);
+     return;
+   }
    this.diagramComponent.saveFile(draft);
  }
 
@@ -52,5 +62,20 @@ ngOnDestroy() {
 
     this.importError = error;
   }
-
+  openConfirmationDialog(event : any) {
+    let clientX : string =event.clientX+'px';
+    let clientY : string =event.clientY+'px';
+    console.info(clientX+"          "+clientY);
+    this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      disableClose: false,
+      position:  {top: clientX, left:clientY}
+    });
+    this.dialogRef.componentInstance.confirmMessage = "Process is missing end event!"
+    this.dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+        // do confirmation actions
+      }
+      this.dialogRef = null;
+    });
+  }
 }

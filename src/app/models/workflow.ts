@@ -9,8 +9,9 @@ export class Workflow {
     private version: number;
     private dateCreated: Date;
     private dateModified: Date;
-    private filePath: string;
+//    private filePath: string;
     private draft: boolean;
+    private xml: string;
     private action: string;
     
     randomValue = enumeration => {
@@ -22,14 +23,15 @@ export class Workflow {
         return enumeration[ enumKey];
       };
 
-    public constructor(name:string,draft : boolean){
+    public constructor(name: string, draft: boolean, xml: string){
         this.dateCreated= new Date();
         this.version=this.dateCreated.getTime();
         this.draft=draft;
         this.name=name;
         this.module=this.randomValue(Modules);
         this.customer=this.randomValue(Customers);
-        this.filePath=this.setPath();
+    //    this.filePath=this.setPath();
+        this.xml= xml;
         this.action="CREATE_WORKFLOAW";
 
     }
@@ -89,7 +91,7 @@ export class Workflow {
         this.dateModified = dateModified;
     }
 
-    public getFilePath(): string {
+ /*   public getFilePath(): string {
         return this.filePath;
     }
 
@@ -98,7 +100,7 @@ export class Workflow {
         this.dateModified = new Date();
         this.version= this.dateModified.getTime();
     }
-
+*/
     public getDraft(): boolean {
         return this.draft;
     }
@@ -107,6 +109,13 @@ export class Workflow {
         this.draft = draft;
     }
 
+    public getXml(): string {
+        return this.xml;
+    }
+
+    public setXml(xml: string): void {
+        this.xml = xml;
+    }
     public getAction(): string {
         return this.action;
     }

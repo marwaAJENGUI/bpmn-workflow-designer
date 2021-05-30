@@ -6,7 +6,9 @@
 <div class="import-error" *ngIf="importError">
     <strong>Failed to render diagram: </strong>
     {{ importError.message }}
-  </div>
+</div>
+<button  (click)="saveXmlFile(false, $event)" >save</button> &nbsp;&nbsp; 
+<button  (click)="saveXmlFile(true, $event)" >save as draft</button>
 <div class="io-import-export">
 
     <ul class="io-import io-control io-control-list io-horizontal">
@@ -22,12 +24,20 @@
         </li> 
     </ul>
     <ul>    
-        <li>
-            <button  (click)="saveXmlFile(false)" >save</button>
-            <button  (click)="saveXmlFile(true)" >save as draft</button>
-        </li>
+        
         <li>
             <file-save-as fileExtension=".bpmn20.xml" contentType="text/xml" [fileContent]="fileData"></file-save-as>
         </li>
     </ul>
 </div>
+<button
+      class="btn btn-outline-secondary"
+      mwlConfirmationPopover
+      [popoverTitle]="popoverTitle"
+      [popoverMessage]="popoverMessage"
+      placement="right"
+      (confirm)="confirmClicked = true"
+      (cancel)="cancelClicked = true"
+    >
+      Click me!
+</button>

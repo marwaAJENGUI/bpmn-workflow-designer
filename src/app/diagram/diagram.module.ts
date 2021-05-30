@@ -13,7 +13,7 @@ import { ModelerRightClikEventService } from './services/modeler-right-clik-even
   ],
   imports: [
     CommonModule,
-    PropertiesPanelModule
+    PropertiesPanelModule,
   ],
   exports:[
     DiagramComponent,

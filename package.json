@@ -12,17 +12,21 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "~9.1.12",
+    "@angular/cdk": "^12.0.2",
     "@angular/common": "~9.1.12",
     "@angular/compiler": "~9.1.12",
     "@angular/core": "~9.1.12",
     "@angular/forms": "~9.1.12",
+    "@angular/material": "^11.2.13",
     "@angular/platform-browser": "~9.1.12",
     "@angular/platform-browser-dynamic": "~9.1.12",
     "@angular/router": "~9.1.12",
+    "angular-confirmation-popover": "^6.0.0",
     "bpmn-js": "^8.2.1",
+    "bpmn-js-bpmnlint": "^0.18.0",
+    "bpmnlint": "^7.2.1",
     "diagram-js-minimap": "^2.0.4",
     "ngx-bpmn-modeler": "^1.0.1",
-    "path": "^0.12.7",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"
@@ -46,5 +50,9 @@
     "ts-node": "~8.3.0",
     "tslint": "~6.1.0",
     "typescript": "~3.8.3"
+  },
+  "browser": {
+    "fs": false,
+    "path": false
   }
 }

@@ -8,20 +8,32 @@ import { FormsModule } from '@angular/forms';
 import { FileSaveAsComponent } from './file-save-as/file-save-as.component';
 import { DiagramModule } from './diagram/diagram.module';
 import { from } from 'rxjs';
+import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ConfirmationPopoverModule } from 'angular-confirmation-popover';
+
 @NgModule({
   declarations: [
     AppComponent,
     FileUploadComponent,
     FileSaveAsComponent,
+    ConfirmationDialogComponent,
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
     FormsModule,
-    DiagramModule
+    DiagramModule,
+    MatDialogModule,
+    BrowserAnimationsModule,
+    ConfirmationPopoverModule.forRoot({
+      confirmButtonType: 'danger'
+    })
   ],
   providers: [
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [ConfirmationDialogComponent]
 })
 export class AppModule { }

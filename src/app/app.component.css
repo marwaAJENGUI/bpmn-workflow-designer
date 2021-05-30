@@ -6,3 +6,9 @@
 .import-error {
   color: red;
 }
+.absolute-position {
+  position: absolute;
+  top: "700px";
+  left: "80px";
+  background-color: aqua;
+}

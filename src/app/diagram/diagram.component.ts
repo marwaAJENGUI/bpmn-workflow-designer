@@ -29,6 +29,10 @@ import  {default as customControlsModule}  from './custom';
 import { Workflow } from '../models/workflow';
 import { WorkflowService } from './services/workflow.service';
 //import * as fs from "fs";
+//import  fs from "fs";
+//import * as path from 'path';
+import { is } from 'bpmn-js/lib/util/ModelUtil';
+
 @Component({
   selector: 'app-diagram',
   templateUrl: './diagram.component.html',
@@ -82,7 +86,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
       container: "#diagram-component",
       additionalModules: [
         minimapModule,
-        customControlsModule
+        customControlsModule,
       ],
       userTE: userTaskExtension,
     });
@@ -125,15 +129,18 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   
   saveFile(draft:boolean){
     console.log("saveFile()");
+    console.info(this.isValid());
     this.bpmnJS.saveXML({ format: true }, (err, xml) =>{
       // here xml is the bpmn format 
-      console.log("xml===", xml);
+      console.info("xml===", xml);
       this.data.changeMessage(xml);
-      let workflow= new Workflow("workflow_test",draft);
-      let file = new File ([xml],"text.xml", {type: 'text/xml'});
+      let workflow= new Workflow("workflow_test",draft,xml);
+      //let file = new File ([xml],"text.xml", {type: 'text/xml'});
+      
+      //fs.appendFile(path.join(__dirname,'../../assets/mynewfile1.txt'), 'Hello content!', function (err) {
       /*
       fs.appendFile('mynewfile1.txt', 'Hello content!', function (err) {
-        if (err) throw err;
+          if (err) throw err;
         console.log('Saved!');
       });
       */
@@ -141,6 +148,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
       console.info(workflow);
     });
   }
+  
 
   /**
    * Load diagram from URL and emit completion event
@@ -183,6 +191,39 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   }
   onRightClick(event:any){
     this.rightClick.changeMessage(event);
+  }
+
+  isValid ():boolean {
+    let elements = this.bpmnJS.get('elementRegistry')._elements;  
+    console.info(Object.keys(elements).length);
+    let c=0;
+    let element;
+    let valid= true;
+    for (let k in elements) {
+      if (c==0){
+        c++;
+        continue;
+      }
+        element=elements[k].element;
+        console.info("------------------------------------------------------------------");
+        console.info(element);
+        console.info(element.type!='bpmn:EndEvent');
+        console.info(element.outgoing.length);
+        console.info(!((element.type!='bpmn:EndEvent') && (element.type!='bpmn:SequenceFlow') && !(element.outgoing.length)));
+        valid=(!((element.type!='bpmn:EndEvent') && (element.type!='bpmn:SequenceFlow') && !(element.outgoing.length))) 
+        if  (valid==false)   break;
+    }
+    console.info(valid+"******************************************************************");
+    return valid; 
+  }
+
+  private getElement(elementType: string): any {
+    let elementRegistry = this.bpmnJS.get('elementRegistry');  
+    console.info(elementRegistry);
+    let elements = elementRegistry.filter(function (element) {
+      return is(element, elementType);
+    });
+    return elements;
   }
 }
     /*if (changes.content) {
