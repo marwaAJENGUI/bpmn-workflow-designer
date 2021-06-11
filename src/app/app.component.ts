@@ -6,6 +6,7 @@ import { WorkflowService } from './diagram/services/workflow.service';
 import { Workflow } from './models/workflow';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialogRef,MatDialog} from '@angular/material/dialog';
+import { Actions } from './models/actions.enum';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -34,14 +35,22 @@ export class AppComponent implements OnInit, OnDestroy {
 ngOnDestroy() {
   this.subscription.unsubscribe();
 }
+start(){
 
- saveXmlFile(draft:boolean, event : any){
-   console.log("app->saveXmlFile()");
-   if (!draft && !this.diagramComponent.isValid()) {
-     this.openConfirmationDialog(event);
-     return;
-   }
-   this.diagramComponent.saveFile(draft);
+}
+saveXmlFile(isDraft:boolean, event : any, start: boolean){
+  setTimeout(()=> {
+    console.log("app->saveXmlFile()");
+    if (!isDraft && !this.diagramComponent.isValid()) {
+      this.openConfirmationDialog(event);
+      return;
+    }
+    let action:string;
+    if (start) {action=Actions[Actions.CREATE_AND_START_WORKFLOW];}
+    else  {action=Actions[Actions.CREATE_WORKFLOW];}
+    console.info("action= "+action);
+    this.diagramComponent.saveFile(isDraft,action);
+  },1000);  
  }
 
  handleImported(event) {
@@ -68,7 +77,7 @@ ngOnDestroy() {
     console.info(clientX+"          "+clientY);
     this.dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       disableClose: false,
-      position:  {top: clientX, left:clientY}
+      position:  {top: clientX, left:clientY},
     });
     this.dialogRef.componentInstance.confirmMessage = "Process is missing end event!"
     this.dialogRef.afterClosed().subscribe(result => {

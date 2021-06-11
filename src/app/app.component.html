@@ -7,8 +7,9 @@
     <strong>Failed to render diagram: </strong>
     {{ importError.message }}
 </div>
-<button  (click)="saveXmlFile(false, $event)" >save</button> &nbsp;&nbsp; 
-<button  (click)="saveXmlFile(true, $event)" >save as draft</button>
+<button  (click)="saveXmlFile(false, $event, false)" >save</button> &nbsp;&nbsp; 
+<button  (click)="saveXmlFile(true, $event, false)" >save as draft</button> &nbsp;&nbsp; 
+<button  (click)="saveXmlFile(false, $event, true)" >save &amp; Start</button> 
 <div class="io-import-export">
 
     <ul class="io-import io-control io-control-list io-horizontal">

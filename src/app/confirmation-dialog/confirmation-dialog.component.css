@@ -1,0 +1,13 @@
+::ng-deep.mat-dialog-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+#center-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: rgba(167, 160, 160, 0.171);
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}

@@ -1,0 +1,5 @@
+export enum Actions {
+    CREATE_WORKFLOW,
+    START_WORKFLOW,
+    CREATE_AND_START_WORKFLOW
+}

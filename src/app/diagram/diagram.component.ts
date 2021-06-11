@@ -10,7 +10,8 @@ import {
   ViewChild,
   SimpleChanges,
   EventEmitter,
-  AfterViewInit
+  AfterViewInit,
+  Inject
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, switchMap } from 'rxjs/operators';
@@ -32,6 +33,12 @@ import { WorkflowService } from './services/workflow.service';
 //import  fs from "fs";
 //import * as path from 'path';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
+import { Actions } from '../models/actions.enum';
+
+import propertiesPanelModule from 'bpmn-js-properties-panel';
+import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
+import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-diagram',
@@ -55,6 +62,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   static readonly HIGH_PRIORITY = 1500;
 
   constructor(private http: HttpClient,
+    @Inject(DOCUMENT) document,
     private data: DataService,
     private bpmn:BpmnJsService,
     private rightClick:ModelerRightClikEventService,
@@ -84,10 +92,19 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   ngAfterViewInit():void{
     this.bpmnJS = new BpmnJS({
       container: "#diagram-component",
+      propertiesPanel: {
+        parent: '#js-properties-panel'
+      },
       additionalModules: [
         minimapModule,
+        propertiesPanelModule,
+        propertiesProviderModule,
         customControlsModule,
       ],
+      // needed if you'd like to maintain camunda:XXX properties in the properties panel
+      moddleExtensions: {
+        camunda: camundaModdleDescriptor
+      },
       userTE: userTaskExtension,
     });
     console.info(this.bpmnJS);
@@ -127,14 +144,14 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.bpmnSubscription.unsubscribe();
   }
   
-  saveFile(draft:boolean){
+  saveFile(isDraft:boolean, action: string){
     console.log("saveFile()");
     console.info(this.isValid());
     this.bpmnJS.saveXML({ format: true }, (err, xml) =>{
       // here xml is the bpmn format 
       console.info("xml===", xml);
       this.data.changeMessage(xml);
-      let workflow= new Workflow("workflow_test",draft,xml);
+      let workflow= new Workflow(this.processName(),isDraft,xml,action);
       //let file = new File ([xml],"text.xml", {type: 'text/xml'});
       
       //fs.appendFile(path.join(__dirname,'../../assets/mynewfile1.txt'), 'Hello content!', function (err) {
@@ -193,24 +210,32 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
     this.rightClick.changeMessage(event);
   }
 
+
+  processName ():string {
+    let elements = this.bpmnJS.get('elementRegistry')._elements;  
+    let element;
+    for (let k in elements) {
+        element=elements[k].element;
+        if (element.type=="bpmn:Process") {
+          console.info("processName= "+element.id);
+          return element.id;
+        }
+    }
+    console.info("processName not found");
+    return null; 
+  }
   isValid ():boolean {
     let elements = this.bpmnJS.get('elementRegistry')._elements;  
+    console.info(elements);
     console.info(Object.keys(elements).length);
-    let c=0;
     let element;
     let valid= true;
     for (let k in elements) {
-      if (c==0){
-        c++;
-        continue;
-      }
         element=elements[k].element;
         console.info("------------------------------------------------------------------");
         console.info(element);
-        console.info(element.type!='bpmn:EndEvent');
-        console.info(element.outgoing.length);
-        console.info(!((element.type!='bpmn:EndEvent') && (element.type!='bpmn:SequenceFlow') && !(element.outgoing.length)));
-        valid=(!((element.type!='bpmn:EndEvent') && (element.type!='bpmn:SequenceFlow') && !(element.outgoing.length))) 
+        if ((element.type.toLowerCase( ).includes('task')||element.type.toLowerCase( ).includes('start'))&&(element.outgoing.length==0)) valid=false;
+        console.info("valid="+valid);
         if  (valid==false)   break;
     }
     console.info(valid+"******************************************************************");

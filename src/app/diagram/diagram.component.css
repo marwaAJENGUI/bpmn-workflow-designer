@@ -1,4 +1,22 @@
 .diagram-container {
   height: 100%;
-  width: 100%;
+  width: 80%;
+}
+#js-properties-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 20%;
+  z-index: 10;
+  border-left: 1px solid #ccc;
+  background-color: #f8f8f8;
+  overflow: auto;
+}
+#js-properties-panel:empty {
+  display: none;
+}
+#js-properties-panel > .djs-properties-panel {
+  padding-bottom: 70px;
+  min-height: 100%;
 }

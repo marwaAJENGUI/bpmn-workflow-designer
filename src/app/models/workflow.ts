@@ -23,7 +23,7 @@ export class Workflow {
         return enumeration[ enumKey];
       };
 
-    public constructor(name: string, draft: boolean, xml: string){
+    public constructor(name: string, draft: boolean, xml: string, action: string){
         this.dateCreated= new Date();
         this.version=this.dateCreated.getTime();
         this.draft=draft;
@@ -32,8 +32,8 @@ export class Workflow {
         this.customer=this.randomValue(Customers);
     //    this.filePath=this.setPath();
         this.xml= xml;
-        this.action="CREATE_WORKFLOAW";
-
+        this.action=action;
+        console.info("workflow->action : "+this.action);
     }
     public getId(): number {
         return this.id;
