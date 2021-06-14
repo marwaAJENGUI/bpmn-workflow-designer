@@ -1,0 +1,12 @@
+<!-- <app-diagram style="height: 100%;width: 100%;"></app-diagram> -->
+<div class="diagram-parent" >
+    <diagram [url]="diagramUrl" (importDone)="handleImported($event)"  ></diagram>
+
+</div>
+<div class="import-error" *ngIf="importError">
+    <strong>Failed to render diagram: </strong>
+    {{ importError.message }}
+</div>
+<button  (click)="saveXmlFile(false, $event, false)" >save</button> &nbsp;&nbsp; 
+<button  (click)="saveXmlFile(true, $event, false)" >save as draft</button> &nbsp;&nbsp; 
+<button  (click)="saveXmlFile(false, $event, true)" >save &amp; Start</button> 

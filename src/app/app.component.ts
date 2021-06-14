@@ -1,18 +1,18 @@
 import { Component, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataService } from './diagram/services/data.service';
-import { DiagramComponent } from './diagram/diagram.component';
-import { WorkflowService } from './diagram/services/workflow.service';
+import { DataService } from './workflow/modeler/diagram/services/data.service';
+import { DiagramComponent } from './workflow/modeler/diagram/diagram.component';
+import { WorkflowService } from './workflow/services/workflow.service';
 import { Workflow } from './models/workflow';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import {MatDialogRef,MatDialog} from '@angular/material/dialog';
 import { Actions } from './models/actions.enum';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
-
 export class AppComponent implements OnInit, OnDestroy {
   title = 'bpmn-io';
  // diagramUrl = 'https://cdn.staticaly.com/gh/bpmn-io/bpmn-js-examples/dfceecba/starter/diagram.bpmn';

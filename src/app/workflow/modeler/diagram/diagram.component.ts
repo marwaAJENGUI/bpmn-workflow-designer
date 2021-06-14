@@ -19,7 +19,7 @@ import { map, switchMap } from 'rxjs/operators';
 //import * as BpmnJS from 'bpmn-js/dist/bpmn-modeler.production.min.js';
 
 import BpmnJS from 'bpmn-js/lib/Modeler.js';
-import  userTaskExtension from './../../resources/user-task-properties.json';
+import  userTaskExtension from './../../../../resources/user-task-properties.json';
 import minimapModule  from 'diagram-js-minimap';
 
 import { from, Observable, Subscription } from 'rxjs';
@@ -27,13 +27,13 @@ import { DataService } from './services/data.service';
 import { BpmnJsService } from './services/bpmn-js.service';
 import { ModelerRightClikEventService } from './services/modeler-right-clik-event.service';
 import  {default as customControlsModule}  from './custom';
-import { Workflow } from '../models/workflow';
-import { WorkflowService } from './services/workflow.service';
+import { Workflow } from '../../../models/workflow';
+import { WorkflowService } from './../../services/workflow.service';
 //import * as fs from "fs";
 //import  fs from "fs";
 //import * as path from 'path';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
-import { Actions } from '../models/actions.enum';
+import { Actions } from '../../../models/actions.enum';
 
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
@@ -41,7 +41,7 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json'
 import { DOCUMENT } from '@angular/common';
 
 @Component({
-  selector: 'app-diagram',
+  selector: 'diagram',
   templateUrl: './diagram.component.html',
   styleUrls: [
     './diagram.component.css'

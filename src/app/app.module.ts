@@ -6,12 +6,13 @@ import {HttpClientModule} from '@angular/common/http';
 import { FileUploadComponent } from './file-upload/file-upload.component'
 import { FormsModule } from '@angular/forms';
 import { FileSaveAsComponent } from './file-save-as/file-save-as.component';
-import { DiagramModule } from './diagram/diagram.module';
 import { from } from 'rxjs';
 import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ConfirmationPopoverModule } from 'angular-confirmation-popover';
+import { WorkflowModule } from './workflow/workflow.module';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -22,9 +23,10 @@ import { ConfirmationPopoverModule } from 'angular-confirmation-popover';
   ],
   imports: [
     BrowserModule,
+    AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    DiagramModule,
+    WorkflowModule,
     MatDialogModule,
     BrowserAnimationsModule,
     ConfirmationPopoverModule.forRoot({
