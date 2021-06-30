@@ -66,8 +66,11 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
   static readonly HIGH_PRIORITY = 1500;
   static readonly ASSIGNEE ="#camunda-assignee";
   private users=["muhamed","amin","fathi"];
-  private userSelect: string;
+  private userSelect: string=null;
   private script:string=null;
+  private elementRegistry:any;
+  private modeling:any;
+ 
   constructor(private http: HttpClient,
     private renderer:Renderer2,
     private data: DataService,
@@ -75,7 +78,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     private rightClick:ModelerRightClikEventService,
     private workflowRest: WorkflowService
   ){
-    this.userSelect=this.setUserSelect(this.users);
+    this.userSelect=this.setUserSelect(this.users,null);
     this.script=this.setScript();
   }
   setScript():string{
@@ -90,12 +93,16 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     script+="</script>";
     return script;
   }
-  setUserSelect(users:string[]):string{
+  setUserSelect(users:string[],user:string):string{
     let userSelect=`<select onchange="onAssigneeChange()" id="select-user">`;
+    userSelect+=`<option disabled selected value> -- select employee -- </option>`;
     for (let i of this.users){
-      userSelect+= `<option value = "`+i+`" >`+i+`</option>`;
+      userSelect+= `<option value = "`+i;
+      if(user==i) userSelect+= `" selected `;
+      userSelect+= `" >`+i+`</option>`;
     }
     userSelect+=`</select>`;
+    console.log("userSelect="+userSelect);
     return userSelect;
   }
   ngOnInit(): void { 
@@ -147,7 +154,8 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
       console.log("this.url "+this.url);
     }
     this.sendBpmn();
-    
+    this.elementRegistry=this.bpmnJS.get('elementRegistry');
+    this.modeling = this.bpmnJS.get('modeling');
     // broadcast right click event
     this.bpmnJS.on('element.contextmenu', DiagramComponent.HIGH_PRIORITY, (event) => {
       this.onRightClick(event);
@@ -178,30 +186,37 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     console.log(assignee);
   }
   ngAfterViewChecked(){
-  /*  var newContent = `<select id="listbox1 id='camunda-assignee'">
-    <option value="Green">Green</option>
-    <option selected value="Orange">Orange</option>
-    <option value="Red">Red</option>
-    <option>Blue</option>
-    <option>Violet</option>
-    <option>Periwinkle</option>
- </select>`;  
-  */
-    let selectUser=this.panel.nativeElement.querySelector('#select-user');
-    if (selectUser==null){
-      console.info(selectUser);
-      let assignee=this.panel.nativeElement.querySelector('#camunda-assignee');
-      if(assignee) {
-        let parent=this.renderer.parentNode(assignee); 
-        console.log(parent);
-        this.renderer.setProperty(parent, 'innerHTML', this.userSelect);
-        //this.renderer.destroyNode(assignee);
-        this.renderer.appendChild(parent,assignee);
-        //this.renderer.setProperty(parent, 'innerHTML', this.userSelect); 
-        this.renderer.setStyle(assignee,"display","none");
-        console.log(parent);
+      let selectUser=this.panel.nativeElement.querySelector('#select-user');
+      console.log(selectUser);
+      if (selectUser==null){
+        let assignee=this.panel.nativeElement.querySelector('#camunda-assignee');
+        if(assignee) {
+          let parent=this.renderer.parentNode(assignee); 
+          console.log(parent);
+          let selectedElements = this.bpmnJS.get('selection').get();
+          console.log(selectedElements[0].businessObject.assignee);
+          let assigneeValue=selectedElements[0].businessObject.assignee;
+          console.log(selectedElements);
+          if (assigneeValue){
+            console.log(assigneeValue);
+            this.userSelect=this.setUserSelect(this.users,assigneeValue);
+            //this.renderer.setProperty(parent, 'innerHTML', this.userSelect);          
+          }else{
+            this.userSelect=this.setUserSelect(this.users,null);
+            console.log(this.userSelect);
+          } 
+          this.renderer.setProperty(parent, 'innerHTML', this.userSelect);
+            //this.renderer.destroyNode(assignee);
+          this.renderer.appendChild(parent,assignee);
+            //this.renderer.setProperty(parent, 'innerHTML', this.userSelect); 
+            this.renderer.setStyle(assignee,"display","none");
+            console.log(parent);               
+        }
       }
-    }     
+      //to detect the change and update assignee value
+      this.bpmnJS.get('selection');
+      //var selectedElements = this.bpmnJS.get('selection.changed').get();
+      //console.info(selectedElements);
   }
   ngOnChanges(changes: SimpleChanges) {
     console.info(changes);
@@ -211,7 +226,6 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
       console.log("changes.url.currentValue= "+changes.url.currentValue);
       this.sendBpmn();
     }
-
   }
 
   ngOnDestroy(): void {
@@ -288,7 +302,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
 
 
   private processName ():string {
-    let elements = this.bpmnJS.get('elementRegistry')._elements;  
+    let elements = this.elementRegistry._elements;  
     let element;
     for (let k in elements) {
         element=elements[k].element;
