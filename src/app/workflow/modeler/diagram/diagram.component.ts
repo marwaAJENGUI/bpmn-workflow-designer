@@ -11,7 +11,10 @@ import {
   SimpleChanges,
   EventEmitter,
   AfterViewInit,
-  Inject
+  Inject,
+  AfterViewChecked,
+  Renderer2,
+  HostListener
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, switchMap } from 'rxjs/operators';
@@ -47,28 +50,54 @@ import { DOCUMENT } from '@angular/common';
     './diagram.component.css'
     ]
 })
-export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, OnInit {
+export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChanges, OnDestroy, OnInit {
   private bpmnJS: BpmnJS;
 
   @ViewChild('ref', { static: true }) private el: ElementRef;
+  @ViewChild('panel', { static: true }) private panel: ElementRef;
   @Output() private importDone: EventEmitter<any> = new EventEmitter();
   @Input() private url: string ;
-  fileData:any;
-  subscription: Subscription;
-  bpmnData:any;
-  bpmnSubscription: Subscription;
-  rightClickEvent:any;
-  rightClickSubscription: Subscription;
+  private fileData:any;
+  private subscription: Subscription;
+  private bpmnData:any;
+  private bpmnSubscription: Subscription;
+  private rightClickEvent:any;
+  private rightClickSubscription: Subscription;
   static readonly HIGH_PRIORITY = 1500;
-
+  static readonly ASSIGNEE ="#camunda-assignee";
+  private users=["muhamed","amin","fathi"];
+  private userSelect: string;
+  private script:string=null;
   constructor(private http: HttpClient,
-    @Inject(DOCUMENT) document,
+    private renderer:Renderer2,
     private data: DataService,
     private bpmn:BpmnJsService,
     private rightClick:ModelerRightClikEventService,
     private workflowRest: WorkflowService
-  ) { }
-  
+  ){
+    this.userSelect=this.setUserSelect(this.users);
+    this.script=this.setScript();
+  }
+  setScript():string{
+    let script="<script>";
+    script+=`var onAssigneeChange= function () {
+      let userList = document.getElementById("select-user");
+      let userId = userList.value;
+      let assignee=document.getElementById("camunda-assignee");
+      assignee.value=userId;
+      console.log(assignee);
+  }`;
+    script+="</script>";
+    return script;
+  }
+  setUserSelect(users:string[]):string{
+    let userSelect=`<select onchange="onAssigneeChange()" id="select-user">`;
+    for (let i of this.users){
+      userSelect+= `<option value = "`+i+`" >`+i+`</option>`;
+    }
+    userSelect+=`</select>`;
+    return userSelect;
+  }
   ngOnInit(): void { 
     this.subscription = this.data.currentMessage.subscribe(message => {
       if (message!='default message') {
@@ -88,7 +117,6 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
       }
     });
   }
-
   ngAfterViewInit():void{
     this.bpmnJS = new BpmnJS({
       container: "#diagram-component",
@@ -127,15 +155,63 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
       event.originalEvent.preventDefault();
       event.originalEvent.stopPropagation();  
     });
+   
   }
-
+ /* @HostListener('document:click', ['$event'])
+    clickEvent(event) {
+      if(this.el.nativeElement.contains(event.target)) {
+        var newContent = `<p id='camunda-assignee'>ppppppp</p>`;  
+        let elements = this.panel.nativeElement.querySelector('.bpp-field-wrapper');  
+        console.log(elements);
+        if(elements.querySelector('#camunda-assignee')) this.renderer.setProperty(elements, 'innerHTML', newContent);
+         elements = this.panel.nativeElement.querySelector('#camunda-assignee');
+         
+        console.log(elements);  
+    }
+  }
+*/
+  onAssigneeChange() {
+    let userList =this.panel.nativeElement.querySelector('#select-user');
+    let userId = userList.value;
+    let assignee= this.panel.nativeElement.querySelector('#camunda-assignee');
+    assignee.value=userId;
+    console.log(assignee);
+  }
+  ngAfterViewChecked(){
+  /*  var newContent = `<select id="listbox1 id='camunda-assignee'">
+    <option value="Green">Green</option>
+    <option selected value="Orange">Orange</option>
+    <option value="Red">Red</option>
+    <option>Blue</option>
+    <option>Violet</option>
+    <option>Periwinkle</option>
+ </select>`;  
+  */
+    let selectUser=this.panel.nativeElement.querySelector('#select-user');
+    if (selectUser==null){
+      console.info(selectUser);
+      let assignee=this.panel.nativeElement.querySelector('#camunda-assignee');
+      if(assignee) {
+        let parent=this.renderer.parentNode(assignee); 
+        console.log(parent);
+        this.renderer.setProperty(parent, 'innerHTML', this.userSelect);
+        //this.renderer.destroyNode(assignee);
+        this.renderer.appendChild(parent,assignee);
+        //this.renderer.setProperty(parent, 'innerHTML', this.userSelect); 
+        this.renderer.setStyle(assignee,"display","none");
+        console.log(parent);
+      }
+    }     
+  }
   ngOnChanges(changes: SimpleChanges) {
+    console.info(changes);
     // re-import whenever the url changes
     if (changes.url) {
       this.loadUrl(changes.url.currentValue);
       console.log("changes.url.currentValue= "+changes.url.currentValue);
       this.sendBpmn();
     }
+
   }
 
   ngOnDestroy(): void {
@@ -170,7 +246,7 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   /**
    * Load diagram from URL and emit completion event
    */
-  loadUrl(url: string): Subscription {
+  private loadUrl(url: string): Subscription {
     if ( url == null) return;
     return (
       this.http.get(url, { responseType: 'text' }).pipe(
@@ -202,16 +278,16 @@ export class DiagramComponent implements AfterViewInit, OnChanges, OnDestroy, On
   private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
     return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
   }
-  sendBpmn() {
+  private sendBpmn() {
     this.bpmn.changeMessage(this.bpmnJS);
     console.log(this.bpmnJS);
   }
-  onRightClick(event:any){
+  private onRightClick(event:any){
     this.rightClick.changeMessage(event);
   }
 
 
-  processName ():string {
+  private processName ():string {
     let elements = this.bpmnJS.get('elementRegistry')._elements;  
     let element;
     for (let k in elements) {

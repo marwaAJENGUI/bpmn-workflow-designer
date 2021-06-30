@@ -30,7 +30,7 @@ export class WorkflowService {
     )
   }
      
-  errorHandler(error) {
+  private errorHandler(error) {
     let errorMessage = '';
     if(error.error instanceof ErrorEvent) {
       errorMessage = error.error.message;

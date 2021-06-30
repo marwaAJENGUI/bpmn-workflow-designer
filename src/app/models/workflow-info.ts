@@ -12,7 +12,7 @@ export class WorkflowInfo {
     private draft: boolean;
     private action: string;
     
-    randomValue = enumeration => {
+    private randomValue = enumeration => {
         console.log('enumeration: ' + enumeration);
         const values = Object.keys(enumeration);
         console.log('values: ' + values);

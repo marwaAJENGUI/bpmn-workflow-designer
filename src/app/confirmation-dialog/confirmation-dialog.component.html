@@ -1,11 +1,11 @@
 <div id="center-content">
   <div style="   margin: 20px;">
-    <h1 md-dialog-title>Confirm</h1>
+    <h1 md-dialog-title>{{titleMessage}}</h1>
     <div md-dialog-content>{{confirmMessage}}</div>
-    <div md-dialog-actions>
+    <div md-dialog-actions style="text-align: center;">
       <br>
-      <button md-button style="color: #fff;background-color: #153961;" (click)="dialogRef.close(true)">Confirm</button>
-    <!-- <button md-button (click)="dialogRef.close(false)">Cancel</button> -->
+      <button *ngIf="confirmButton" md-button style="color: #fff;background-color: #153961;" (click)="dialogRef.close(true)">{{confirmButton}}</button>
+      <button *ngIf="cancelButton" md-button (click)="dialogRef.close(false)">{{cancelButton}}</button>
     </div>
 </div>
 </div>

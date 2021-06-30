@@ -3,10 +3,14 @@
     <diagram [url]="diagramUrl" (importDone)="handleImported($event)"  ></diagram>
 
 </div>
-<div class="import-error" *ngIf="importError">
-    <strong>Failed to render diagram: </strong>
-    {{ importError.message }}
+<div class="modeler-class">
+    <div class="import-error" *ngIf="importError">
+        <strong>Failed to render diagram: </strong>
+        {{ importError.message }}
+    </div>
+    <div  class="btn-group" role="group" style="margin-left:70% ;">
+        <button  (click)="saveXmlFile(false, $event, false)" type="button" class="btn btn-outline-secondary">save</button> 
+        <button  (click)="saveXmlFile(true, $event, false)" type="button" class="btn btn-outline-secondary">save as draft</button>
+        <button  (click)="saveXmlFile(false, $event, true)" type="button" class="btn btn-outline-secondary">save &amp; Start</button>
+    </div>
 </div>
-<button  (click)="saveXmlFile(false, $event, false)" >save</button> &nbsp;&nbsp; 
-<button  (click)="saveXmlFile(true, $event, false)" >save as draft</button> &nbsp;&nbsp; 
-<button  (click)="saveXmlFile(false, $event, true)" >save &amp; Start</button> 

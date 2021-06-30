@@ -1,7 +1,7 @@
 import CustomPaletteProvider from './CustomPaletteProvider';
-import CustomReplaceMenuProvider from './CustomReplaceMenuProvider';
+import ReplaceMenuProvider from './CustomReplaceMenuProvider';
 export default {
   __init__: [ 'ReplaceMenuProvider' ],
   'paletteProvider': [ 'type', CustomPaletteProvider ],
-  ReplaceMenuProvider: [ 'type', CustomReplaceMenuProvider ],
+  'ReplaceMenuProvider': [ 'type', ReplaceMenuProvider ],
 };

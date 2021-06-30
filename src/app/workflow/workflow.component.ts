@@ -9,7 +9,7 @@ import { WorkflowService } from './services/workflow.service';
 })
 export class WorkflowComponent implements OnInit {
 
-  workflowInfoes: WorkflowInfo[] = [];
+  public workflowInfoes: WorkflowInfo[] = [];
   
   constructor(public workflowService: WorkflowService) { }
   

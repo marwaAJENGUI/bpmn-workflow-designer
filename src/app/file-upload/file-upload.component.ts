@@ -9,10 +9,10 @@ import { DataService } from '../workflow/modeler/diagram/services/data.service';
 })
 export class FileUploadComponent implements OnInit,OnDestroy {
 
-  fileToUpload: File = null;
-  file:File=null;
-  fileData:any;
-  subscription: Subscription;
+  private fileToUpload: File = null;
+  private file:File=null;
+  private fileData:any;
+  private subscription: Subscription;
 
   constructor(private data: DataService) { }
 
@@ -26,14 +26,14 @@ export class FileUploadComponent implements OnInit,OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-  handleFileInput(files: FileList) {
+  public handleFileInput(files: FileList) {
     this.fileToUpload = files.item(0);
     console.log("fileToUpload= "+this.fileToUpload);
     console.log("fileToUpload.name= "+this.fileToUpload.name);
     console.log("fileToUpload.type= "+this.fileToUpload.type);
     console.log("fileToUpload.size= "+this.fileToUpload.size);
 }
-uploadDocument() {
+public uploadDocument() {
   let fileReader = new FileReader();
   fileReader.onload = (e) => {
     console.log(fileReader.result);

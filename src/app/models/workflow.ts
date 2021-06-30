@@ -14,7 +14,7 @@ export class Workflow {
     private xml: string;
     private action: string;
     
-    randomValue = enumeration => {
+    private randomValue = enumeration => {
         console.log('enumeration: ' + enumeration);
         const values = Object.keys(enumeration);
         console.log('values: ' + values);
@@ -126,7 +126,7 @@ export class Workflow {
 
     public setPath(){
         let file = (this.draft)?"draft":"valid";
-        return this.customer+"/"+this.module+"/"+file+"/"+this.name+"_"+this.version;
+        return this.module+"/"+this.customer+"/"+file+"/"+this.name+"_"+this.version;
     }
 
 }
