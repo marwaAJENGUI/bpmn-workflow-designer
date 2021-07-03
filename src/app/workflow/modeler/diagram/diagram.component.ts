@@ -32,6 +32,7 @@ import { ModelerRightClikEventService } from './services/modeler-right-clik-even
 import  {default as customControlsModule}  from './custom';
 import { Workflow } from '../../../models/workflow';
 import { WorkflowService } from './../../services/workflow.service';
+import { UserService } from './../../../services/user.service';
 //import * as fs from "fs";
 //import  fs from "fs";
 //import * as path from 'path';
@@ -42,6 +43,7 @@ import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
 import { DOCUMENT } from '@angular/common';
+import { User } from 'src/app/models/user';
 
 @Component({
   selector: 'diagram',
@@ -65,9 +67,10 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
   private rightClickSubscription: Subscription;
   static readonly HIGH_PRIORITY = 1500;
   static readonly ASSIGNEE ="#camunda-assignee";
-  private users=["muhamed","amin","fathi"];
+  private users: User[]= [];
   private userSelect: string=null;
-  private script:string=null;
+  private javaClasses=["service1","service2","service3"];
+  private classSelect: string=null;
   private elementRegistry:any;
   private modeling:any;
  
@@ -76,30 +79,32 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     private data: DataService,
     private bpmn:BpmnJsService,
     private rightClick:ModelerRightClikEventService,
-    private workflowRest: WorkflowService
-  ){
-    this.userSelect=this.setUserSelect(this.users,null);
-    this.script=this.setScript();
+    private workflowRest: WorkflowService,
+    private userService: UserService
+  ){ 
+    
+   }
+  setClassSelect(classes:string[],javaClass:string):string{
+    let classSelect=`<select onchange="onInputChange('select-service-task-class','camunda-delegate')" id="select-service-task-class">`;
+    classSelect+=`<option disabled selected value> -- select service class -- </option>`;
+    for (let i of classes){
+      classSelect+= `<option value = "`+i;
+      if(javaClass==i) classSelect+= `" selected `;
+      classSelect+= `" >`+i+`</option>`;
+    }
+    classSelect+=`</select>`;
+    console.log("classSelect="+classSelect);
+    return classSelect;
   }
-  setScript():string{
-    let script="<script>";
-    script+=`var onAssigneeChange= function () {
-      let userList = document.getElementById("select-user");
-      let userId = userList.value;
-      let assignee=document.getElementById("camunda-assignee");
-      assignee.value=userId;
-      console.log(assignee);
-  }`;
-    script+="</script>";
-    return script;
-  }
-  setUserSelect(users:string[],user:string):string{
-    let userSelect=`<select onchange="onAssigneeChange()" id="select-user">`;
+  setUserSelect(users:User[],userId:number):string{
+    let userSelect=`<select onchange="onInputChange('select-user','camunda-assignee')" id="select-user">`;
     userSelect+=`<option disabled selected value> -- select employee -- </option>`;
-    for (let i of this.users){
-      userSelect+= `<option value = "`+i;
-      if(user==i) userSelect+= `" selected `;
-      userSelect+= `" >`+i+`</option>`;
+    let user=null;
+    for(let i=0;i<users.length;i++){
+      user=users[i];
+      userSelect+= `<option value = "`+user.id;
+      if(String(userId)==String(user.id)) userSelect+= `" selected `;
+      userSelect+= `" >`+user.username+`</option>`;
     }
     userSelect+=`</select>`;
     console.log("userSelect="+userSelect);
@@ -123,7 +128,14 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
         this.bpmnJS=message;
       }
     });
+    this.userService.getAll().subscribe((data: User[])=>{
+      this.users = data;
+      this.userSelect=this.setUserSelect(this.users,null);
+      this.classSelect=this.setClassSelect(this.javaClasses,null);
+      console.log(this.users);
+    });
   }
+
   ngAfterViewInit():void{
     this.bpmnJS = new BpmnJS({
       container: "#diagram-component",
@@ -178,45 +190,65 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     }
   }
 */
-  onAssigneeChange() {
-    let userList =this.panel.nativeElement.querySelector('#select-user');
-    let userId = userList.value;
-    let assignee= this.panel.nativeElement.querySelector('#camunda-assignee');
-    assignee.value=userId;
-    console.log(assignee);
+  changeAssigneeInput(){
+    let selectUser=this.panel.nativeElement.querySelector('#select-user');
+    //console.log(selectUser);
+    if (selectUser==null){
+      let assignee=this.panel.nativeElement.querySelector('#camunda-assignee');
+      if(assignee) {
+        let parent=this.renderer.parentNode(assignee); 
+        console.log(parent);
+        let selectedElements = this.bpmnJS.get('selection').get();
+        console.log(selectedElements[0].businessObject.assignee);
+        let assigneeValue=selectedElements[0].businessObject.assignee;
+        console.log(selectedElements);
+        if (assigneeValue){
+          console.log(assigneeValue);
+          this.userSelect=this.setUserSelect(this.users,assigneeValue);
+        }else{
+          this.userSelect=this.setUserSelect(this.users,null);
+          console.log(this.userSelect);
+        } 
+        this.renderer.setProperty(parent, 'innerHTML', this.userSelect);
+        this.renderer.appendChild(parent,assignee);
+          this.renderer.setStyle(assignee,"display","none");
+          console.log(parent);               
+      }
+    }    
+  }
+  changeJavaClassInput(){
+    let selectServiceTaskClass=this.panel.nativeElement.querySelector('#select-service-task-class');
+    console.log(selectServiceTaskClass);
+    if (selectServiceTaskClass==null){
+      let serviceTaskClass=this.panel.nativeElement.querySelector('#camunda-delegate');
+      if(serviceTaskClass) {
+        let parent=this.renderer.parentNode(serviceTaskClass); 
+        console.log(parent);
+        let selectedElements = this.bpmnJS.get('selection').get();
+        console.log(selectedElements[0].businessObject.class);
+        let classValue=selectedElements[0].businessObject.class;
+        console.log(selectedElements);
+        if (classValue){
+          console.log(classValue);
+          this.classSelect=this.setClassSelect(this.javaClasses,classValue);
+        }else{
+          this.classSelect=this.setClassSelect(this.javaClasses,null);
+          console.log(this.classSelect);
+        } 
+        this.renderer.setProperty(parent, 'innerHTML', this.classSelect);
+        this.renderer.appendChild(parent,serviceTaskClass);
+          this.renderer.setStyle(serviceTaskClass,"display","none");
+          console.log(parent);               
+      }
+    }    
   }
   ngAfterViewChecked(){
-      let selectUser=this.panel.nativeElement.querySelector('#select-user');
-      console.log(selectUser);
-      if (selectUser==null){
-        let assignee=this.panel.nativeElement.querySelector('#camunda-assignee');
-        if(assignee) {
-          let parent=this.renderer.parentNode(assignee); 
-          console.log(parent);
-          let selectedElements = this.bpmnJS.get('selection').get();
-          console.log(selectedElements[0].businessObject.assignee);
-          let assigneeValue=selectedElements[0].businessObject.assignee;
-          console.log(selectedElements);
-          if (assigneeValue){
-            console.log(assigneeValue);
-            this.userSelect=this.setUserSelect(this.users,assigneeValue);
-            //this.renderer.setProperty(parent, 'innerHTML', this.userSelect);          
-          }else{
-            this.userSelect=this.setUserSelect(this.users,null);
-            console.log(this.userSelect);
-          } 
-          this.renderer.setProperty(parent, 'innerHTML', this.userSelect);
-            //this.renderer.destroyNode(assignee);
-          this.renderer.appendChild(parent,assignee);
-            //this.renderer.setProperty(parent, 'innerHTML', this.userSelect); 
-            this.renderer.setStyle(assignee,"display","none");
-            console.log(parent);               
-        }
-      }
-      //to detect the change and update assignee value
-      this.bpmnJS.get('selection');
-      //var selectedElements = this.bpmnJS.get('selection.changed').get();
-      //console.info(selectedElements);
+    this.changeAssigneeInput();
+    this.changeJavaClassInput();
+    //to detect the change and update assignee/delegate input  value
+    this.bpmnJS.get('selection');
+    //var selectedElements = this.bpmnJS.get('selection.changed').get();
+    //console.info(selectedElements);
   }
   ngOnChanges(changes: SimpleChanges) {
     console.info(changes);
