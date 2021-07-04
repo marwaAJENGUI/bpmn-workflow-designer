@@ -33,6 +33,9 @@ import  {default as customControlsModule}  from './custom';
 import { Workflow } from '../../../models/workflow';
 import { WorkflowService } from './../../services/workflow.service';
 import { UserService } from './../../../services/user.service';
+import { User } from 'src/app/models/user';
+import { InfoService } from './services/info.service';
+import { Info } from 'src/app/models/info';
 //import * as fs from "fs";
 //import  fs from "fs";
 //import * as path from 'path';
@@ -43,7 +46,6 @@ import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
 import { DOCUMENT } from '@angular/common';
-import { User } from 'src/app/models/user';
 
 @Component({
   selector: 'diagram',
@@ -69,36 +71,32 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
   static readonly ASSIGNEE ="#camunda-assignee";
   private users: User[]= [];
   private userSelect: string=null;
-  private javaClasses=["service1","service2","service3"];
+  private javaClasses:Info[]=[];
+  private classEl: ElementRef;
   private classSelect: string=null;
+  private expressions:Info[]=[];
+  private expressionEl: ElementRef;
+  private expressionSelect: string=null;
   private elementRegistry:any;
   private modeling:any;
+  private implementationValue:string;
+  
  
-  constructor(private http: HttpClient,
+  constructor(
+    private http: HttpClient,
     private renderer:Renderer2,
     private data: DataService,
     private bpmn:BpmnJsService,
     private rightClick:ModelerRightClikEventService,
     private workflowRest: WorkflowService,
-    private userService: UserService
-  ){ 
-    
+    private userService: UserService,
+    private infoService: InfoService
+  ){     
    }
-  setClassSelect(classes:string[],javaClass:string):string{
-    let classSelect=`<select onchange="onInputChange('select-service-task-class','camunda-delegate')" id="select-service-task-class">`;
-    classSelect+=`<option disabled selected value> -- select service class -- </option>`;
-    for (let i of classes){
-      classSelect+= `<option value = "`+i;
-      if(javaClass==i) classSelect+= `" selected `;
-      classSelect+= `" >`+i+`</option>`;
-    }
-    classSelect+=`</select>`;
-    console.log("classSelect="+classSelect);
-    return classSelect;
-  }
+  
   setUserSelect(users:User[],userId:number):string{
     let userSelect=`<select onchange="onInputChange('select-user','camunda-assignee')" id="select-user">`;
-    userSelect+=`<option disabled selected value> -- select employee -- </option>`;
+    userSelect+=`<option disabled selected value></option>`;
     let user=null;
     for(let i=0;i<users.length;i++){
       user=users[i];
@@ -109,6 +107,26 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     userSelect+=`</select>`;
     console.log("userSelect="+userSelect);
     return userSelect;
+  }
+  setSelect(infoes:Info[],infoValue:string,type?:string):string{
+    let select=`<select onchange="onInputChange('select-delegate','camunda-delegate')" id="select-delegate">`;
+    select+=`<option disabled selected value></option>`;
+    let info=null;
+    let pred="";
+    let post="";
+    if (type=="expression"){
+      pred="${";
+      post="}";
+    }
+    for(let i=0;i<infoes.length;i++){
+      info=infoes[i];
+      select+= `<option value = "`+pred+info.value+post;
+      if(pred+info.value+post==infoValue) select+= `" selected `;
+      select+= `" >`+info.key+`</option>`;
+    }
+    select+=`</select>`;
+    console.log("info select ="+select);
+    return select;
   }
   ngOnInit(): void { 
     this.subscription = this.data.currentMessage.subscribe(message => {
@@ -131,8 +149,17 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     this.userService.getAll().subscribe((data: User[])=>{
       this.users = data;
       this.userSelect=this.setUserSelect(this.users,null);
-      this.classSelect=this.setClassSelect(this.javaClasses,null);
       console.log(this.users);
+    });
+    this.infoService.getClasses().subscribe((data: Info[])=>{
+      this.javaClasses = data;
+      this.classSelect=this.setSelect(this.javaClasses,null);
+      console.log(this.javaClasses);
+    });
+    this.infoService.getExpressions().subscribe((data: Info[])=>{
+      this.expressions = data;
+      this.expressionSelect=this.setSelect(this.expressions,null,'expression');
+      console.log(this.expressions);
     });
   }
 
@@ -148,6 +175,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
         propertiesProviderModule,
         customControlsModule,
       ],
+      // a descriptor that defines Camunda related BPMN 2.0 XML extensions
       // needed if you'd like to maintain camunda:XXX properties in the properties panel
       moddleExtensions: {
         camunda: camundaModdleDescriptor
@@ -179,14 +207,6 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
   }
  /* @HostListener('document:click', ['$event'])
     clickEvent(event) {
-      if(this.el.nativeElement.contains(event.target)) {
-        var newContent = `<p id='camunda-assignee'>ppppppp</p>`;  
-        let elements = this.panel.nativeElement.querySelector('.bpp-field-wrapper');  
-        console.log(elements);
-        if(elements.querySelector('#camunda-assignee')) this.renderer.setProperty(elements, 'innerHTML', newContent);
-         elements = this.panel.nativeElement.querySelector('#camunda-assignee');
-         
-        console.log(elements);  
     }
   }
 */
@@ -216,35 +236,99 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
       }
     }    
   }
-  changeJavaClassInput(){
-    let selectServiceTaskClass=this.panel.nativeElement.querySelector('#select-service-task-class');
-    console.log(selectServiceTaskClass);
-    if (selectServiceTaskClass==null){
-      let serviceTaskClass=this.panel.nativeElement.querySelector('#camunda-delegate');
-      if(serviceTaskClass) {
-        let parent=this.renderer.parentNode(serviceTaskClass); 
-        console.log(parent);
-        let selectedElements = this.bpmnJS.get('selection').get();
-        console.log(selectedElements[0].businessObject.class);
-        let classValue=selectedElements[0].businessObject.class;
-        console.log(selectedElements);
-        if (classValue){
-          console.log(classValue);
-          this.classSelect=this.setClassSelect(this.javaClasses,classValue);
-        }else{
-          this.classSelect=this.setClassSelect(this.javaClasses,null);
-          console.log(this.classSelect);
-        } 
-        this.renderer.setProperty(parent, 'innerHTML', this.classSelect);
-        this.renderer.appendChild(parent,serviceTaskClass);
-          this.renderer.setStyle(serviceTaskClass,"display","none");
-          console.log(parent);               
-      }
-    }    
+  onChange(event){
+    console.log(event);
+    let implementationSelect=this.panel.nativeElement.querySelector('#camunda-implementation-select');
+    this.implementationValue=implementationSelect.options[implementationSelect.selectedIndex].value;
+    console.log(this.implementationValue);        
+  }
+
+  createDelegateSelect(selectedElements,list,selectList,parent,delegate:any,el:ElementRef,attribute:string){
+    console.log(selectedElements[0].businessObject[attribute]);
+    let attributeValue=selectedElements[0].businessObject[attribute];
+    console.log(selectedElements);
+    if (attributeValue){
+      console.log(attributeValue);
+      selectList=this.setSelect(list,attributeValue,attribute);
+    }else{
+      selectList=this.setSelect(list,null,attribute);
+      console.log(parent);
+    } 
+    this.renderer.setProperty(parent, 'innerHTML', selectList);
+    console.log(el.nativeElement);
+    this.renderer.setProperty(el.nativeElement, 'innerHTML',selectList);
+    console.log(el);
+    this.renderer.appendChild(parent,delegate);
+    this.renderer.setStyle(delegate,"display","none");
+  }
+  changeDelegateInput(){
+    let implementationSelect=this.panel.nativeElement.querySelector('#camunda-implementation-select');
+    if (implementationSelect) {
+      implementationSelect.addEventListener('change', this.onChange.bind(this));
+      this.implementationValue=implementationSelect.options[implementationSelect.selectedIndex].value;
+    }
+    let delegateSellect=this.panel.nativeElement.querySelector('#select-delegate');
+    let delegate=this.panel.nativeElement.querySelector('#camunda-delegate');
+    if(delegate) {
+      let parent=this.renderer.parentNode(delegate);
+      let selectedElements = this.bpmnJS.get('selection').get(); 
+      console.log(this.implementationValue);
+      let delegateEl=new ElementRef(delegateSellect);
+      console.log(delegateEl);
+      switch (this.implementationValue) {
+        case 'class':
+          console.log(this.classEl);
+          if((delegateEl.nativeElement==null)||(this.classEl==null)) {
+            console.log(delegateEl.nativeElement);
+            console.log(this.classEl);
+            console.log(selectedElements[0].businessObject['class']);
+            let attributeValue=selectedElements[0].businessObject['class'];
+            if (!attributeValue) attributeValue=null;else console.log(attributeValue);
+            this.classSelect=this.setSelect(this.javaClasses,attributeValue,'class');
+            this.renderer.setProperty(parent, 'innerHTML', this.classSelect);
+            this.renderer.appendChild(parent,delegate);
+            this.renderer.setStyle(delegate,"display","none");
+            this.classEl=new ElementRef(this.panel.nativeElement.querySelector('#select-delegate'));
+            console.log(this.classEl.nativeElement);
+          }else if (this.classEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML){
+            console.log(this.classEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML);
+            console.log(this.classEl.nativeElement.innerHTML);
+            console.log(delegateEl.nativeElement.innerHTML);
+            this.createDelegateSelect(selectedElements,this.javaClasses,this.classSelect,parent,delegate,this.classEl,"class");
+            console.log(this.classEl);
+          }
+        break;
+        case 'expression':
+          console.log(this.expressionEl);
+          if((delegateEl.nativeElement==null)||(this.expressionEl==null)) {
+            console.log(delegateEl.nativeElement==null);
+            console.log(this.expressionEl==null);
+            console.log(selectedElements[0].businessObject['expression']);
+            let attributeValue=selectedElements[0].businessObject['expression'];
+            if (!attributeValue) attributeValue=null;else console.log(attributeValue);
+            this.expressionSelect=this.setSelect(this.expressions,attributeValue,'expression');
+            this.renderer.setProperty(parent, 'innerHTML', this.expressionSelect);
+            this.renderer.appendChild(parent,delegate);
+            this.renderer.setStyle(delegate,"display","none");
+            this.expressionEl=new ElementRef(this.panel.nativeElement.querySelector('#select-delegate'));
+            console.log(this.expressionEl.nativeElement);
+          }else if (this.expressionEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML){
+          this.createDelegateSelect(selectedElements,this.expressions,this.expressionSelect,parent,delegate,this.expressionEl,"expression");
+          }
+        break;
+        case 'delegateExpression':
+            console.log('delegateExpression');
+            if(delegateSellect) this.renderer.removeChild(parent,delegateSellect)
+            this.renderer.appendChild(parent,delegate);
+            this.renderer.setStyle(delegate,"display","inline");
+            console.log(parent);
+        break;
+      }        
+    }        
   }
   ngAfterViewChecked(){
     this.changeAssigneeInput();
-    this.changeJavaClassInput();
+    this.changeDelegateInput();
     //to detect the change and update assignee/delegate input  value
     this.bpmnJS.get('selection');
     //var selectedElements = this.bpmnJS.get('selection.changed').get();
