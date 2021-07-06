@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataService } from '../workflow/modeler/diagram/services/data.service';
+import { DataService } from '../workflow/services/data.service';
 
 @Component({
   selector: 'app-file-upload',

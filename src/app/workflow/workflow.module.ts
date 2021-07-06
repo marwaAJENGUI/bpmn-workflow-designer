@@ -4,6 +4,7 @@ import { WorkflowComponent } from './workflow.component';
 import { ModelerModule } from './modeler/modeler.module';
 import { ViewerModule } from './viewer/viewer.module';
 import { RouterModule } from '@angular/router';
+import { DataService } from './services/data.service';
 
 
 
@@ -21,6 +22,9 @@ import { RouterModule } from '@angular/router';
     WorkflowComponent,
     ModelerModule,
     ViewerModule
+  ],
+  providers: [
+    DataService
   ]
 })
 export class WorkflowModule { }

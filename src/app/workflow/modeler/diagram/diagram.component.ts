@@ -26,7 +26,7 @@ import  userTaskExtension from './../../../../resources/user-task-properties.jso
 import minimapModule  from 'diagram-js-minimap';
 
 import { from, Observable, Subscription } from 'rxjs';
-import { DataService } from './services/data.service';
+import { DataService } from './../../services/data.service';
 import { BpmnJsService } from './services/bpmn-js.service';
 import { ModelerRightClikEventService } from './services/modeler-right-clik-event.service';
 import  {default as customControlsModule}  from './custom';
@@ -36,9 +36,6 @@ import { UserService } from './../../../services/user.service';
 import { User } from 'src/app/models/user';
 import { InfoService } from './services/info.service';
 import { Info } from 'src/app/models/info';
-//import * as fs from "fs";
-//import  fs from "fs";
-//import * as path from 'path';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { Actions } from '../../../models/actions.enum';
 
@@ -132,8 +129,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     this.subscription = this.data.currentMessage.subscribe(message => {
       if (message!='default message') {
         this.fileData = message;
-        this.importDiagram(this.fileData);
-        this.sendBpmn();
+        console.log(this.fileData);
       }
     });
     this.rightClickSubscription = this.rightClick.currentMessage.subscribe(message => {
@@ -188,7 +184,11 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
         this.bpmnJS.get('canvas').zoom('fit-viewport');
       }
     }); 
-    this.bpmnJS.createDiagram();
+    if (this.fileData) {
+      console.log(this.fileData);
+      this.importDiagram(this.fileData);
+      this.sendBpmn();
+    }else this.bpmnJS.createDiagram();
     if (this.url!=null) {
       this.loadUrl(this.url);
       console.log("this.url "+this.url);
@@ -243,21 +243,13 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     console.log(this.implementationValue);        
   }
 
-  createDelegateSelect(selectedElements,list,selectList,parent,delegate:any,el:ElementRef,attribute:string){
+  createDelegateSelect(selectedElements,list,selectList,parent,delegate:any,attribute:string){
     console.log(selectedElements[0].businessObject[attribute]);
     let attributeValue=selectedElements[0].businessObject[attribute];
     console.log(selectedElements);
-    if (attributeValue){
-      console.log(attributeValue);
-      selectList=this.setSelect(list,attributeValue,attribute);
-    }else{
-      selectList=this.setSelect(list,null,attribute);
-      console.log(parent);
-    } 
+    if (!attributeValue) attributeValue=null;else console.log(attributeValue);
+    selectList=this.setSelect(list,attributeValue,attribute);
     this.renderer.setProperty(parent, 'innerHTML', selectList);
-    console.log(el.nativeElement);
-    this.renderer.setProperty(el.nativeElement, 'innerHTML',selectList);
-    console.log(el);
     this.renderer.appendChild(parent,delegate);
     this.renderer.setStyle(delegate,"display","none");
   }
@@ -279,47 +271,22 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
         case 'class':
           console.log(this.classEl);
           if((delegateEl.nativeElement==null)||(this.classEl==null)) {
-            console.log(delegateEl.nativeElement);
-            console.log(this.classEl);
-            console.log(selectedElements[0].businessObject['class']);
-            let attributeValue=selectedElements[0].businessObject['class'];
-            if (!attributeValue) attributeValue=null;else console.log(attributeValue);
-            this.classSelect=this.setSelect(this.javaClasses,attributeValue,'class');
-            this.renderer.setProperty(parent, 'innerHTML', this.classSelect);
-            this.renderer.appendChild(parent,delegate);
-            this.renderer.setStyle(delegate,"display","none");
+            this.createDelegateSelect(selectedElements,this.javaClasses,this.classSelect,parent,delegate,"class");
             this.classEl=new ElementRef(this.panel.nativeElement.querySelector('#select-delegate'));
             console.log(this.classEl.nativeElement);
-          }else if (this.classEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML){
-            console.log(this.classEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML);
-            console.log(this.classEl.nativeElement.innerHTML);
-            console.log(delegateEl.nativeElement.innerHTML);
-            this.createDelegateSelect(selectedElements,this.javaClasses,this.classSelect,parent,delegate,this.classEl,"class");
-            console.log(this.classEl);
           }
         break;
         case 'expression':
           console.log(this.expressionEl);
           if((delegateEl.nativeElement==null)||(this.expressionEl==null)) {
-            console.log(delegateEl.nativeElement==null);
-            console.log(this.expressionEl==null);
-            console.log(selectedElements[0].businessObject['expression']);
-            let attributeValue=selectedElements[0].businessObject['expression'];
-            if (!attributeValue) attributeValue=null;else console.log(attributeValue);
-            this.expressionSelect=this.setSelect(this.expressions,attributeValue,'expression');
-            this.renderer.setProperty(parent, 'innerHTML', this.expressionSelect);
-            this.renderer.appendChild(parent,delegate);
-            this.renderer.setStyle(delegate,"display","none");
+            this.createDelegateSelect(selectedElements,this.expressions,this.expressionSelect,parent,delegate,"expression");
             this.expressionEl=new ElementRef(this.panel.nativeElement.querySelector('#select-delegate'));
             console.log(this.expressionEl.nativeElement);
-          }else if (this.expressionEl.nativeElement.innerHTML!=delegateEl.nativeElement.innerHTML){
-          this.createDelegateSelect(selectedElements,this.expressions,this.expressionSelect,parent,delegate,this.expressionEl,"expression");
           }
         break;
         case 'delegateExpression':
             console.log('delegateExpression');
-            if(delegateSellect) this.renderer.removeChild(parent,delegateSellect)
-            this.renderer.appendChild(parent,delegate);
+            if(delegateSellect) this.renderer.removeChild(parent,delegateSellect);
             this.renderer.setStyle(delegate,"display","inline");
             console.log(parent);
         break;
@@ -358,15 +325,6 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
       console.info("xml===", xml);
       this.data.changeMessage(xml);
       let workflow= new Workflow(this.processName(),isDraft,xml,action);
-      //let file = new File ([xml],"text.xml", {type: 'text/xml'});
-      
-      //fs.appendFile(path.join(__dirname,'../../assets/mynewfile1.txt'), 'Hello content!', function (err) {
-      /*
-      fs.appendFile('mynewfile1.txt', 'Hello content!', function (err) {
-          if (err) throw err;
-        console.log('Saved!');
-      });
-      */
       console.info(this.workflowRest.save(workflow));
       console.info(workflow);
     });
@@ -408,6 +366,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
   private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
     return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
   }
+      
   private sendBpmn() {
     this.bpmn.changeMessage(this.bpmnJS);
     console.log(this.bpmnJS);
@@ -457,20 +416,3 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     return elements;
   }
 }
-    /*if (changes.content) {
-      console.log("changes.content.currentValue"+changes.content.currentValue);
-      if (this.content!='default message') this.importDiagram(this.content);
-     /*  this.bpmnJS.importXML(this.content,(err, warnings) => {
-        if (err) {
-          this.importDone.emit({
-            type: 'error',
-            error: err
-          })
-        } else {
-          this.importDone.emit({
-            type: 'success',
-            warnings: warnings
-          });
-        }
-      });
-    } */

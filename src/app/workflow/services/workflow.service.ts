@@ -23,8 +23,8 @@ export class WorkflowService {
       console.info(this.url+"/message=> response : "+data);
     });
   }
-  getAll(): Observable<WorkflowInfo[]> {
-    return this.http.get<WorkflowInfo[]>(this.url + '/api/workflow-info-list')
+  getAll(): Observable<Workflow[]> {
+    return this.http.get<Workflow[]>(this.url + '/api/workflow-list')
     .pipe(
       catchError(this.errorHandler)
     )

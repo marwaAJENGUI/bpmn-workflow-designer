@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DataService } from './diagram/services/data.service';
+import { DataService } from './../services/data.service';
 import { DiagramComponent } from './diagram/diagram.component';
 import { WorkflowService } from './../services/workflow.service';
 import { Workflow } from './../../models/workflow';
