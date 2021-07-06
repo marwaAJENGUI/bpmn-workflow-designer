@@ -29,7 +29,6 @@ export class WorkflowComponent implements OnInit {
   }
   
   redirect(xml:string,navigation:string[]):void{
-    console.log(xml);
     this.data.changeMessage(xml);
     this.router.navigate(navigation);
   }

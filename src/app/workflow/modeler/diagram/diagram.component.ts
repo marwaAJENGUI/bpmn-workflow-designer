@@ -39,6 +39,8 @@ import { Info } from 'src/app/models/info';
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { Actions } from '../../../models/actions.enum';
 
+import CustomPaletteProvider from './custom/CustomPaletteProvider';
+import CustomReplaceMenuProvider from './custom/CustomReplaceMenuProvider';
 import propertiesPanelModule from 'bpmn-js-properties-panel';
 import propertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
@@ -165,8 +167,11 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
       propertiesPanel: {
         parent: '#js-properties-panel'
       },
+      __init__: [ 'ReplaceMenuProvider' ],
       additionalModules: [
         minimapModule,
+        {paletteProvider: [ 'type', CustomPaletteProvider ]},
+        {'ReplaceMenuProvider': [ 'type', CustomReplaceMenuProvider ]},
         propertiesPanelModule,
         propertiesProviderModule,
         customControlsModule,
