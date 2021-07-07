@@ -13,7 +13,8 @@ export class Workflow {
     private draft: boolean;
     private xml: string;
     private action: string;
-    
+    private processDefinitionId: string;
+
     private randomValue = enumeration => {
         console.log('enumeration: ' + enumeration);
         const values = Object.keys(enumeration);
@@ -124,9 +125,15 @@ export class Workflow {
         this.action = action;
     }
 
-    public setPath(){
+    public getProcessDefinitionId(): string {
+        return this.processDefinitionId;
+      }
+      public setProcessDefinitionId(processDefinitionId: string) {
+        this.processDefinitionId=processDefinitionId;
+      } 
+
+    public getPath(){
         let file = (this.draft)?"draft":"valid";
         return this.module+"/"+this.customer+"/"+file+"/"+this.name+"_"+this.version;
     }
-
 }

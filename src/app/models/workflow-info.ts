@@ -11,7 +11,8 @@ export class WorkflowInfo {
     private dateModified: Date;
     private draft: boolean;
     private action: string;
-    
+    private processDefinitionId: string;
+
     private randomValue = enumeration => {
         console.log('enumeration: ' + enumeration);
         const values = Object.keys(enumeration);
@@ -103,10 +104,16 @@ export class WorkflowInfo {
     public setAction(action: string): void {
         this.action = action;
     }
+    public getProcessDefinitionId(): string {
+        return this.processDefinitionId;
+      }
+      public setProcessDefinitionId(processDefinitionId: string) {
+        this.processDefinitionId=processDefinitionId;
+      } 
 
-    public setPath(){
+    public getPath(){
         let file = (this.draft)?"draft":"valid";
-        return this.customer+"/"+this.module+"/"+file+"/"+this.name+"_"+this.version;
+        return this.module+"/"+this.customer+"/"+file+"/"+this.name+"_"+this.version;
     }
 
 }
