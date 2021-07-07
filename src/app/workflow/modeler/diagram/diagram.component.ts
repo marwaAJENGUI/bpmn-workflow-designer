@@ -54,7 +54,7 @@ import { DOCUMENT } from '@angular/common';
     ]
 })
 export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChanges, OnDestroy, OnInit {
-  private bpmnJS: BpmnJS;
+  public bpmnJS: BpmnJS;
 
   @ViewChild('ref', { static: true }) private el: ElementRef;
   @ViewChild('panel', { static: true }) private panel: ElementRef;
@@ -368,7 +368,7 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
    *
    * @see https://github.com/bpmn-io/bpmn-js-callbacks-to-promises#importxml
    */
-  private importDiagram(xml: string): Observable<{warnings: Array<any>}> {
+  public importDiagram(xml: string): Observable<{warnings: Array<any>}> {
     return from(this.bpmnJS.importXML(xml) as Promise<{warnings: Array<any>}>);
   }
       
@@ -394,7 +394,8 @@ export class DiagramComponent implements AfterViewInit,AfterViewChecked, OnChang
     console.info("processName not found");
     return null; 
   }
-  isValid ():boolean {
+
+  public isValid ():boolean {
     let elements = this.bpmnJS.get('elementRegistry')._elements;  
     console.info(elements);
     console.info(Object.keys(elements).length);

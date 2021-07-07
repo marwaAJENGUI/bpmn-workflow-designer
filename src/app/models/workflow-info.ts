@@ -21,7 +21,8 @@ export class WorkflowInfo {
         return enumeration[ enumKey];
       };
 
-    public constructor(name: string, draft: boolean, action: string){
+    public constructor(name: string, draft: boolean, action: string,id?:number){
+        this.id=id;
         this.dateCreated= new Date();
         this.version=this.dateCreated.getTime();
         this.draft=draft;

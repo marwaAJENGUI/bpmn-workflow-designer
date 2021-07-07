@@ -31,9 +31,7 @@ export class ModelerComponent implements OnInit, OnDestroy {
  ngOnDestroy() {
    this.subscription.unsubscribe();
  }
- private start(){
- 
- }
+
  public saveXmlFile(isDraft:boolean, event : any, start: boolean){
    setTimeout(()=> {
      console.log("app->saveXmlFile()");
